@@ -4,9 +4,12 @@ A **Next.js** web application for centrally managing an [Anthias](https://github
 
 ## Features
 
-- **Group broadcast** — push an image to the entire fleet in one click
-- **Screen management** — register any Anthias instance by IP and label
+- **Group broadcast** — push an image or video to the entire fleet in one click
+- **Screen management** — register any Anthias instance by IP/hostname, remove it if needed
 - **Media library** — view and edit already-deployed assets (name, duration, dates, enabled state)
+- **Authentication** — login via Microsoft (Entra ID / Azure AD) or email + password
+- **Role-based access** — three roles: `ADMIN`, `USER`, `PENDING`; new users wait for approval
+- **User management** — admin panel to approve, promote or revoke users
 - **Multilingual** — French and English UI, switchable without a page reload (via `NEXT_LOCALE` cookie)
 
 ## Tech Stack
@@ -15,6 +18,7 @@ A **Next.js** web application for centrally managing an [Anthias](https://github
 |-------|------------|
 | Framework | Next.js 16 (App Router, standalone output) |
 | UI | Tailwind CSS v4, Lucide React |
+| Auth | NextAuth v4 (Azure AD + Credentials providers) |
 | i18n | next-intl v4 (cookie-based, no URL routing) |
 | Database | SQLite via Prisma 7 |
 | Runtime | Node.js 24 LTS |
@@ -23,7 +27,7 @@ A **Next.js** web application for centrally managing an [Anthias](https://github
 ## Prerequisites
 
 - Node.js 20+
-- One or more [Anthias](https://github.com/Screenly/anthias) instances reachable on the network (hardware-agnostic)
+- One or more [Anthias](https://github.com/Screenly/anthias) instances reachable on the network
 
 ## Local Development
 
@@ -31,13 +35,19 @@ A **Next.js** web application for centrally managing an [Anthias](https://github
 # 1. Install dependencies
 npm install
 
-# 2. Generate the Prisma client
-npx prisma generate
+# 2. Copy and fill environment variables
+cp .env.example .env
 
 # 3. Apply migrations (creates the SQLite database)
-DATABASE_URL="file:./dev.db" npx prisma migrate deploy
+npx prisma migrate deploy
 
-# 4. Start the development server
+# 4. Generate the Prisma client
+npx prisma generate
+
+# 5. Create your first admin account
+npx tsx scripts/create-user.ts you@example.com "yourpassword" "Your Name"
+
+# 6. Start the development server
 npm run dev
 ```
 
@@ -59,37 +69,96 @@ DATABASE_URL : file:/app/data/prod.db  (overridable via env)
 
 ## Environment Variables
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `DATABASE_URL` | `file:/app/data/prod.db` | Path to the SQLite database |
-| `PORT` | `3000` | Listening port |
-| `NODE_ENV` | `production` | Node environment |
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `DATABASE_URL` | Yes | Path to the SQLite database (`file:./dev.db` locally) |
+| `NEXTAUTH_SECRET` | Yes | Random secret for JWT signing — generate with `openssl rand -base64 32` |
+| `NEXTAUTH_URL` | Yes | Public base URL of the app (e.g. `http://localhost:3000`) |
+| `AZURE_AD_CLIENT_ID` | Optional | Azure App Registration client ID |
+| `AZURE_AD_CLIENT_SECRET` | Optional | Azure App Registration client secret |
+| `AZURE_AD_TENANT_ID` | Optional | Azure tenant ID (omit for multi-tenant) |
+| `PORT` | No | Listening port (default: `3000`) |
+
+### `.env.example`
+
+```env
+DATABASE_URL="file:./dev.db"
+NEXTAUTH_SECRET=replace_with_openssl_rand_base64_32
+NEXTAUTH_URL=http://localhost:3000
+
+# Microsoft Entra ID (optional — leave empty to disable Microsoft login)
+AZURE_AD_CLIENT_ID=
+AZURE_AD_CLIENT_SECRET=
+AZURE_AD_TENANT_ID=
+```
+
+## Authentication
+
+### Microsoft (Entra ID / Azure AD)
+
+1. Go to **Azure Portal → App registrations → New registration**
+2. Supported account types: `Accounts in this organizational directory only`
+3. Redirect URI: `Web` → `http://localhost:3000/api/auth/callback/azure-ad`
+4. Under **Certificates & secrets**, create a new client secret
+5. Copy **Application (client) ID**, **Directory (tenant) ID** and the secret value into `.env`
+6. For production, add your public URL as an additional redirect URI
+
+### Email / Password
+
+Users can be created manually with the provided script:
+
+```bash
+npx tsx scripts/create-user.ts <email> <password> [display name]
+```
+
+Users created this way are automatically assigned the `ADMIN` role.
+
+## Role System
+
+| Role | Access |
+|------|--------|
+| `ADMIN` | Full access + user management (`/admin/users`) |
+| `USER` | Full access to the dashboard |
+| `PENDING` | Blocked — sees a waiting page until an admin approves them |
+
+New Microsoft sign-ins start as `PENDING`. Admins approve them at `/admin/users`.
 
 ## Project Structure
 
 ```
 ├── app/
-│   ├── layout.tsx              # Root layout with NextIntlClientProvider
-│   ├── page.tsx                # Main page
+│   ├── layout.tsx              # Root layout (NextIntl + SessionProvider)
+│   ├── page.tsx                # Main dashboard
+│   ├── login/                  # Login page (Microsoft + credentials)
+│   ├── pending/                # Waiting-for-approval page
+│   ├── admin/users/            # User management (ADMIN only)
 │   └── api/
+│       ├── auth/[...nextauth]/ # NextAuth handler
 │       ├── screens/            # Screen CRUD (SQLite)
 │       ├── assets/[id]/        # Read / update a single Anthias asset
 │       ├── assets/             # Aggregated asset list across all screens
-│       └── broadcast/          # Upload + deploy to all screens
+│       ├── broadcast/          # Upload + deploy to all screens
+│       └── admin/users/        # User role management API
 ├── components/
-│   ├── Header.tsx              # App header + LocaleSwitcher
+│   ├── Header.tsx              # App header + admin link + sign-out
+│   ├── Providers.tsx           # SessionProvider wrapper
 │   ├── LocaleSwitcher.tsx      # FR/EN toggle (NEXT_LOCALE cookie)
 │   ├── ScreenManager.tsx       # Screen list and registration
 │   ├── BroadcastForm.tsx       # Broadcast form
-│   └── AssetLibrary.tsx        # Asset table
-├── i18n/
-│   ├── request.ts              # Locale resolution from cookie
-│   └── routing.ts              # Available locales declaration
+│   ├── AssetLibrary.tsx        # Asset table
+│   └── Toast.tsx               # In-app notification
+├── lib/
+│   ├── prisma.ts               # Prisma client (BetterSqlite3 adapter)
+│   └── validate.ts             # IP/hostname and asset ID validators
+├── scripts/
+│   └── create-user.ts          # CLI to create admin users
+├── auth.ts                     # NextAuth config (providers + callbacks)
+├── middleware.ts               # Auth + role guard for all routes
 ├── messages/
 │   ├── fr.json                 # French translations
 │   └── en.json                 # English translations
 ├── prisma/
-│   └── schema.prisma           # Screen model (ip, label)
+│   └── schema.prisma           # Screen + auth models
 ├── Dockerfile                  # Multi-stage build on Node 24
 ├── compose.yml                 # nextjs-standalone service + SQLite volume
 └── docker-entrypoint.sh        # migrate deploy → node server.js
@@ -97,16 +166,19 @@ DATABASE_URL : file:/app/data/prod.db  (overridable via env)
 
 ## Internal API
 
-| Method | Route | Description |
-|--------|-------|-------------|
-| `GET` | `/api/screens` | List all registered screens |
-| `POST` | `/api/screens` | Add a screen `{ ip, label }` |
-| `GET` | `/api/assets` | Fetch asset list from the first available screen |
-| `GET` | `/api/assets/[id]` | Retrieve asset content (base64) |
-| `PUT` | `/api/assets/[id]` | Update asset metadata |
-| `POST` | `/api/broadcast` | Upload file + create asset on all screens |
+| Method | Route | Auth | Description |
+|--------|-------|------|-------------|
+| `GET` | `/api/screens` | USER+ | List all registered screens with online status |
+| `POST` | `/api/screens` | USER+ | Add a screen `{ ip, label }` |
+| `DELETE` | `/api/screens/[id]` | USER+ | Remove a screen |
+| `GET` | `/api/assets` | USER+ | Fetch asset list from the first available screen |
+| `GET` | `/api/assets/[id]` | USER+ | Retrieve asset content (base64) |
+| `PUT` | `/api/assets/[id]` | USER+ | Update asset metadata on all screens |
+| `POST` | `/api/broadcast` | USER+ | Upload file + create asset on all screens |
+| `GET` | `/api/admin/users` | ADMIN | List all users |
+| `PATCH` | `/api/admin/users` | ADMIN | Update a user's role |
 
-> Calls to screens use the Anthias REST API v2 (`http://<ip>/api/v2`).
+> Screen calls proxy to the Anthias REST API v2 (`http://<ip>/api/v2`).
 
 ## Adding a Language
 
