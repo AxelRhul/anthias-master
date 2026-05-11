@@ -1,6 +1,6 @@
 "use client";
 import { useRef, useState } from 'react';
-import { Wifi, WifiOff } from 'lucide-react';
+import { Wifi, WifiOff, Trash2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 const IPV4_REGEX = /^(\d{1,3}\.){3}\d{1,3}$/;
@@ -13,7 +13,7 @@ function isValidHost(host: string): boolean {
     return HOSTNAME_REGEX.test(h);
 }
 
-export const ScreenManager = ({ screens, onAdd }: any) => {
+export const ScreenManager = ({ screens, onAdd, onDelete }: any) => {
     const t = useTranslations('Screens');
     const ipRef = useRef<HTMLInputElement>(null);
     const labelRef = useRef<HTMLInputElement>(null);
@@ -42,7 +42,16 @@ export const ScreenManager = ({ screens, onAdd }: any) => {
                     {screens.map((s: any) => (
                         <div key={s.id} className="flex items-center justify-between p-4 bg-slate-950 rounded-2xl border border-slate-800">
                             <div><p className="font-bold">{s.label}</p><p className="text-xs font-mono text-slate-500">{s.ip}</p></div>
-                            {s.online ? <Wifi className="text-emerald-500" /> : <WifiOff className="text-rose-500" />}
+                            <div className="flex items-center gap-3">
+                                {s.online ? <Wifi className="text-emerald-500" /> : <WifiOff className="text-rose-500" />}
+                                <button
+                                    onClick={() => onDelete(s.id)}
+                                    className="p-1.5 text-slate-600 hover:text-rose-500 transition-colors"
+                                    title="Supprimer"
+                                >
+                                    <Trash2 size={16} />
+                                </button>
+                            </div>
                         </div>
                     ))}
                 </div>

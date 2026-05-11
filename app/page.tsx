@@ -30,6 +30,11 @@ export default function MasterOps() {
     finally { setLoading(false); }
   };
 
+  const deleteScreen = async (id: number) => {
+    await fetch(`/api/screens/${id}`, { method: 'DELETE' });
+    loadAll();
+  };
+
   const addScreen = async (ip: string, label: string) => {
     const res = await fetch('/api/screens', {
       method: 'POST',
@@ -82,7 +87,7 @@ export default function MasterOps() {
 
           <div className="grid grid-cols-12 gap-8">
             <div className="col-span-12 lg:col-span-4">
-              <ScreenManager screens={screens} onAdd={addScreen} />
+              <ScreenManager screens={screens} onAdd={addScreen} onDelete={deleteScreen} />
             </div>
 
             <div className="col-span-12 lg:col-span-8 space-y-8">
