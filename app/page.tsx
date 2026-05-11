@@ -5,6 +5,7 @@ import { Header } from '@/components/Header';
 import { ScreenManager } from '@/components/ScreenManager';
 import { BroadcastForm } from '@/components/BroadcastForm';
 import { AssetLibrary } from '@/components/AssetLibrary';
+import { Toast } from '@/components/Toast';
 import { Save, X } from 'lucide-react';
 
 export default function MasterOps() {
@@ -12,6 +13,7 @@ export default function MasterOps() {
   const [screens, setScreens] = useState<any[]>([]);
   const [assets, setAssets] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
   const [preview, setPreview] = useState<any>(null);
   const [editingAsset, setEditingAsset] = useState<any>(null);
 
@@ -55,7 +57,7 @@ export default function MasterOps() {
     const fd = new FormData(e.currentTarget);
     await fetch('/api/broadcast', { method: 'POST', body: fd });
     setLoading(false);
-    alert(t('broadcastDone'));
+    setToast(t('broadcastDone'));
     loadAll();
   };
 
@@ -96,6 +98,8 @@ export default function MasterOps() {
             </div>
           </div>
         </div>
+
+        {toast && <Toast message={toast} onClose={() => setToast(null)} />}
 
         {preview && (
             <div className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-12" onClick={() => setPreview(null)}>
