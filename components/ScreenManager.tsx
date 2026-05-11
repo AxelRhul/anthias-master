@@ -1,8 +1,39 @@
+"use client";
+import { useRef, useState } from 'react';
 import { Wifi, WifiOff } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
+const IPV4_REGEX = /^(\d{1,3}\.){3}\d{1,3}$/;
+const HOSTNAME_REGEX = /^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+
+function isValidHost(host: string): boolean {
+    const h = host.trim();
+    if (!h || h.length > 253) return false;
+    if (IPV4_REGEX.test(h)) return h.split('.').every(p => parseInt(p, 10) <= 255);
+    return HOSTNAME_REGEX.test(h);
+}
+
 export const ScreenManager = ({ screens, onAdd }: any) => {
     const t = useTranslations('Screens');
+    const ipRef = useRef<HTMLInputElement>(null);
+    const labelRef = useRef<HTMLInputElement>(null);
+    const [adding, setAdding] = useState(false);
+
+    const handleAdd = async () => {
+        const ip = ipRef.current?.value.trim() ?? '';
+        const label = labelRef.current?.value.trim() ?? '';
+        if (!ip || !label) return;
+        if (!isValidHost(ip)) {
+            alert(t('invalidIp'));
+            return;
+        }
+        setAdding(true);
+        await onAdd(ip, label);
+        if (ipRef.current) ipRef.current.value = '';
+        if (labelRef.current) labelRef.current.value = '';
+        setAdding(false);
+    };
+
     return (
         <div className="space-y-6">
             <section className="bg-slate-900 border border-slate-800 rounded-3xl p-6">
@@ -19,13 +50,15 @@ export const ScreenManager = ({ screens, onAdd }: any) => {
             <section className="bg-slate-900 border border-slate-800 rounded-3xl p-6">
                 <h2 className="text-lg font-bold mb-4">{t('addTitle')}</h2>
                 <div className="space-y-3">
-                    <input id="add-ip" placeholder={t('labelIp')} className="w-full bg-slate-800 p-3 rounded-xl outline-none" />
-                    <input id="add-label" placeholder={t('labelName')} className="w-full bg-slate-800 p-3 rounded-xl outline-none" />
-                    <button onClick={() => {
-                        const ip = (document.getElementById('add-ip') as HTMLInputElement).value;
-                        const label = (document.getElementById('add-label') as HTMLInputElement).value;
-                        onAdd(ip, label);
-                    }} className="w-full bg-blue-600 p-3 rounded-xl font-bold">{t('btnSave')}</button>
+                    <input ref={ipRef} placeholder={t('labelIp')} className="w-full bg-slate-800 p-3 rounded-xl outline-none" />
+                    <input ref={labelRef} placeholder={t('labelName')} maxLength={100} className="w-full bg-slate-800 p-3 rounded-xl outline-none" />
+                    <button
+                        onClick={handleAdd}
+                        disabled={adding}
+                        className="w-full bg-blue-600 p-3 rounded-xl font-bold disabled:opacity-50"
+                    >
+                        {adding ? '...' : t('btnSave')}
+                    </button>
                 </div>
             </section>
         </div>

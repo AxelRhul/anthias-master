@@ -16,15 +16,15 @@ export const BroadcastForm = ({ onSubmit, loading }: any) => {
                 </div>
                 <div className="col-span-2">
                     <label className="text-xs font-black text-slate-500 mb-2 block">{t('assetTitle')}</label>
-                    <input name="name" className="w-full bg-slate-800 p-4 rounded-2xl outline-none" />
+                    <input name="name" maxLength={255} className="w-full bg-slate-800 p-4 rounded-2xl outline-none" />
                 </div>
                 <div>
                     <label className="text-xs font-black text-slate-500 mb-2 block">{t('duration')}</label>
-                    <input name="duration" type="number" defaultValue="10" className="w-full bg-slate-800 p-3 rounded-xl" />
+                    <input name="duration" type="number" defaultValue="10" min="1" max="86400" className="w-full bg-slate-800 p-3 rounded-xl" />
                 </div>
                 <div>
                     <label className="text-xs font-black text-slate-500 mb-2 block">{t('order')}</label>
-                    <input name="play_order" type="number" defaultValue="0" className="w-full bg-slate-800 p-3 rounded-xl" />
+                    <input name="play_order" type="number" defaultValue="0" min="0" max="9999" className="w-full bg-slate-800 p-3 rounded-xl" />
                 </div>
                 <div>
                     <label className="text-xs font-black text-slate-500 mb-2 block">{t('start')}</label>

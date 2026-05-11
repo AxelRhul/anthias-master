@@ -21,7 +21,8 @@ export default function MasterOps() {
     setLoading(true);
     try {
       const sRes = await fetch('/api/screens');
-      setScreens(await sRes.json());
+      const sData = await sRes.json();
+      setScreens(Array.isArray(sData) ? sData : []);
       const aRes = await fetch('/api/assets');
       const aData = await aRes.json();
       setAssets(Array.isArray(aData) ? aData : []);
@@ -30,7 +31,16 @@ export default function MasterOps() {
   };
 
   const addScreen = async (ip: string, label: string) => {
-    await fetch('/api/screens', { method: 'POST', body: JSON.stringify({ ip, label }) });
+    const res = await fetch('/api/screens', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ip, label }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      alert(err.error ?? 'Erreur lors de l\'ajout');
+      return;
+    }
     loadAll();
   };
 
