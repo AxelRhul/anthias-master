@@ -8,7 +8,8 @@
     "addTitle": "Add a Pi",
     "labelIp": "IP Address",
     "labelName": "Name (ex: Lobby)",
-    "btnSave": "Save"
+    "btnSave": "Save",
+    "invalidIp": "Invalid IP address or hostname"
   },
   "Broadcast": {
     "title": "Group Broadcast",
@@ -28,5 +29,17 @@
     "colActions": "Actions",
     "statusActive": "ACTIVE",
     "statusOff": "OFF"
+  },
+  "modals": {
+    "broadcastDone": "Broadcast complete!",
+    "closeHint": "Click anywhere to close",
+    "editTitle": "Edit asset",
+    "name": "Name",
+    "duration": "Duration (sec)",
+    "active": "Active",
+    "inactive": "Inactive",
+    "startDate": "Start date",
+    "endDate": "End date",
+    "save": "Save"
   }
 }

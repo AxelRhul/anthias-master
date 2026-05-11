@@ -8,7 +8,8 @@
     "addTitle": "Ajouter un appareil",
     "labelIp": "Adresse IP",
     "labelName": "Nom (ex: Salon)",
-    "btnSave": "Enregistrer"
+    "btnSave": "Enregistrer",
+    "invalidIp": "Adresse IP ou nom d'hôte invalide"
   },
   "Broadcast": {
     "title": "Diffusion Groupée",
@@ -28,5 +29,17 @@
     "colActions": "Actions",
     "statusActive": "ACTIF",
     "statusOff": "OFF"
+  },
+  "modals": {
+    "broadcastDone": "Diffusion terminée !",
+    "closeHint": "Cliquez n'importe où pour fermer",
+    "editTitle": "Modifier l'asset",
+    "name": "Nom",
+    "duration": "Durée (sec)",
+    "active": "Actif",
+    "inactive": "Inactif",
+    "startDate": "Date de début",
+    "endDate": "Date de fin",
+    "save": "Enregistrer"
   }
 }
