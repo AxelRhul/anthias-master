@@ -1,0 +1,32 @@
+{
+  "Header": {
+    "title": "ANTHIAS MASTER",
+    "refresh": "Actualiser"
+  },
+  "Screens": {
+    "title": "Parc de TV",
+    "addTitle": "Ajouter un appareil",
+    "labelIp": "Adresse IP",
+    "labelName": "Nom (ex: Salon)",
+    "btnSave": "Enregistrer"
+  },
+  "Broadcast": {
+    "title": "Diffusion Groupée",
+    "file": "Fichier Média",
+    "assetTitle": "Titre de l'Asset",
+    "duration": "Durée (sec)",
+    "order": "Ordre",
+    "start": "Date de Début",
+    "end": "Date de Fin",
+    "btnSubmit": "DIFFUSER SUR TOUT LE PARC",
+    "sending": "TRANSFERT EN COURS..."
+  },
+  "Library": {
+    "title": "Médiathèque",
+    "colMedia": "Média",
+    "colStatus": "Statut",
+    "colActions": "Actions",
+    "statusActive": "ACTIF",
+    "statusOff": "OFF"
+  }
+}

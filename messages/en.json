@@ -1,0 +1,32 @@
+{
+  "Header": {
+    "title": "ANTHIAS MASTER",
+    "refresh": "Refresh"
+  },
+  "Screens": {
+    "title": "TV Fleet",
+    "addTitle": "Add a Pi",
+    "labelIp": "IP Address",
+    "labelName": "Name (ex: Lobby)",
+    "btnSave": "Save"
+  },
+  "Broadcast": {
+    "title": "Group Broadcast",
+    "file": "Media File",
+    "assetTitle": "Asset Title",
+    "duration": "Duration (sec)",
+    "order": "Order",
+    "start": "Start Date",
+    "end": "End Date",
+    "btnSubmit": "DEPLOY TO ALL SCREENS",
+    "sending": "UPLOADING..."
+  },
+  "Library": {
+    "title": "Media Library",
+    "colMedia": "Media",
+    "colStatus": "Status",
+    "colActions": "Actions",
+    "statusActive": "ACTIVE",
+    "statusOff": "OFF"
+  }
+}
