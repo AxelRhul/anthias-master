@@ -9,7 +9,7 @@ export const LocaleSwitcher = () => {
     const router = useRouter();
 
     const switchLocale = (next: string) => {
-        document.cookie = `NEXT_LOCALE=${next}; path=/; max-age=31536000`;
+        document.cookie = `NEXT_LOCALE=${next}; path=/; max-age=31536000; SameSite=Strict`;
         router.refresh();
     };
 
