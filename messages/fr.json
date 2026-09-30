@@ -9,7 +9,8 @@
     "labelIp": "Adresse IP",
     "labelName": "Nom (ex: Salon)",
     "btnSave": "Enregistrer",
-    "invalidIp": "Adresse IP ou nom d'hôte invalide"
+    "invalidIp": "Adresse IP ou nom d'hôte invalide",
+    "sync": "Synchroniser les médias depuis un autre appareil"
   },
   "Broadcast": {
     "title": "Diffusion Groupée",
@@ -33,6 +34,10 @@
   },
   "modals": {
     "broadcastDone": "Diffusion terminée !",
+    "syncDone": "Synchronisation terminée : {copied} copié(s), {failed} échec(s)",
+    "syncUpToDate": "Appareil déjà à jour",
+    "syncNoSource": "Aucun autre appareil en ligne à copier",
+    "syncError": "Échec de la synchronisation",
     "closeHint": "Cliquez n'importe où pour fermer",
     "editTitle": "Modifier l'asset",
     "name": "Nom",

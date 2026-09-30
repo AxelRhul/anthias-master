@@ -1,13 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { isValidAssetId } from '@/lib/validate';
-
-const EXT_MIME: Record<string, string> = {
-    mp4: 'video/mp4', webm: 'video/webm', mov: 'video/quicktime',
-    avi: 'video/x-msvideo', mkv: 'video/x-matroska', ogv: 'video/ogg',
-    jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png',
-    gif: 'image/gif', webp: 'image/webp', svg: 'image/svg+xml',
-};
+import { EXT_MIME } from '@/lib/mime';
 
 function resolveMime(raw: string, uriExt: string): string {
     if (raw && raw !== 'application/octet-stream' && raw.includes('/')) return raw;

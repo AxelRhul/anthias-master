@@ -9,7 +9,8 @@
     "labelIp": "IP Address",
     "labelName": "Name (ex: Lobby)",
     "btnSave": "Save",
-    "invalidIp": "Invalid IP address or hostname"
+    "invalidIp": "Invalid IP address or hostname",
+    "sync": "Sync media from another device"
   },
   "Broadcast": {
     "title": "Group Broadcast",
@@ -33,6 +34,10 @@
   },
   "modals": {
     "broadcastDone": "Broadcast complete!",
+    "syncDone": "Sync complete: {copied} copied, {failed} failed",
+    "syncUpToDate": "Device already up to date",
+    "syncNoSource": "No other online device to copy from",
+    "syncError": "Sync failed",
     "closeHint": "Click anywhere to close",
     "editTitle": "Edit asset",
     "name": "Name",

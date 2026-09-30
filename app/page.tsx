@@ -17,6 +17,7 @@ export default function MasterOps() {
   const [assets, setAssets] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const [syncingId, setSyncingId] = useState<number | null>(null);
   const [preview, setPreview] = useState<any>(null);
   const [editingAsset, setEditingAsset] = useState<any>(null);
 
@@ -51,7 +52,30 @@ export default function MasterOps() {
       alert(err.error ?? 'Erreur lors de l\'ajout');
       return;
     }
-    loadAll();
+    const created = await res.json();
+    await loadAll();
+    syncScreen(created.id);
+  };
+
+  const syncScreen = async (id: number) => {
+    setSyncingId(id);
+    try {
+      const res = await fetch(`/api/screens/${id}/sync`, { method: 'POST' });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) {
+        setToast(data.copied === 0 && data.failed === 0
+          ? t('syncUpToDate')
+          : t('syncDone', { copied: data.copied, failed: data.failed }));
+      } else if (data.error === 'no_source') {
+        setToast(t('syncNoSource'));
+      } else {
+        setToast(t('syncError'));
+      }
+    } catch {
+      setToast(t('syncError'));
+    } finally {
+      setSyncingId(null);
+    }
   };
 
   const handleBroadcast = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -104,7 +128,7 @@ export default function MasterOps() {
 
           <div className="grid grid-cols-12 gap-8">
             <div className="col-span-12 lg:col-span-4">
-              <ScreenManager screens={screens} onAdd={addScreen} onDelete={deleteScreen} isAdmin={isAdmin} />
+              <ScreenManager screens={screens} onAdd={addScreen} onDelete={deleteScreen} onSync={syncScreen} syncingId={syncingId} isAdmin={isAdmin} />
             </div>
 
             <div className="col-span-12 lg:col-span-8 space-y-8">

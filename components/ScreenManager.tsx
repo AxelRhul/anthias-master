@@ -1,6 +1,6 @@
 "use client";
 import { useRef, useState } from 'react';
-import { Wifi, WifiOff, Trash2 } from 'lucide-react';
+import { Wifi, WifiOff, Trash2, RefreshCw } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 const IPV4_REGEX = /^(\d{1,3}\.){3}\d{1,3}$/;
@@ -13,7 +13,7 @@ function isValidHost(host: string): boolean {
     return HOSTNAME_REGEX.test(h);
 }
 
-export const ScreenManager = ({ screens, onAdd, onDelete, isAdmin }: any) => {
+export const ScreenManager = ({ screens, onAdd, onDelete, onSync, syncingId, isAdmin }: any) => {
     const t = useTranslations('Screens');
     const ipRef = useRef<HTMLInputElement>(null);
     const labelRef = useRef<HTMLInputElement>(null);
@@ -44,6 +44,14 @@ export const ScreenManager = ({ screens, onAdd, onDelete, isAdmin }: any) => {
                             <div><p className="font-bold">{s.label}</p><p className="text-xs font-mono text-slate-500">{s.ip}</p></div>
                             <div className="flex items-center gap-3">
                                 {s.online ? <Wifi className="text-emerald-500" /> : <WifiOff className="text-rose-500" />}
+                                <button
+                                    onClick={() => onSync(s.id)}
+                                    disabled={syncingId !== null}
+                                    className="p-1.5 text-slate-600 hover:text-blue-400 transition-colors disabled:opacity-50"
+                                    title={t('sync')}
+                                >
+                                    <RefreshCw size={16} className={syncingId === s.id ? 'animate-spin' : ''} />
+                                </button>
                                 {isAdmin && (
                                     <button
                                         onClick={() => onDelete(s.id)}
