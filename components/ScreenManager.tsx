@@ -13,7 +13,7 @@ function isValidHost(host: string): boolean {
     return HOSTNAME_REGEX.test(h);
 }
 
-export const ScreenManager = ({ screens, onAdd, onDelete }: any) => {
+export const ScreenManager = ({ screens, onAdd, onDelete, isAdmin }: any) => {
     const t = useTranslations('Screens');
     const ipRef = useRef<HTMLInputElement>(null);
     const labelRef = useRef<HTMLInputElement>(null);
@@ -44,19 +44,21 @@ export const ScreenManager = ({ screens, onAdd, onDelete }: any) => {
                             <div><p className="font-bold">{s.label}</p><p className="text-xs font-mono text-slate-500">{s.ip}</p></div>
                             <div className="flex items-center gap-3">
                                 {s.online ? <Wifi className="text-emerald-500" /> : <WifiOff className="text-rose-500" />}
-                                <button
-                                    onClick={() => onDelete(s.id)}
-                                    className="p-1.5 text-slate-600 hover:text-rose-500 transition-colors"
-                                    title="Supprimer"
-                                >
-                                    <Trash2 size={16} />
-                                </button>
+                                {isAdmin && (
+                                    <button
+                                        onClick={() => onDelete(s.id)}
+                                        className="p-1.5 text-slate-600 hover:text-rose-500 transition-colors"
+                                        title="Supprimer"
+                                    >
+                                        <Trash2 size={16} />
+                                    </button>
+                                )}
                             </div>
                         </div>
                     ))}
                 </div>
             </section>
-            <section className="bg-slate-900 border border-slate-800 rounded-3xl p-6">
+            {isAdmin && <section className="bg-slate-900 border border-slate-800 rounded-3xl p-6">
                 <h2 className="text-lg font-bold mb-4">{t('addTitle')}</h2>
                 <div className="space-y-3">
                     <input ref={ipRef} placeholder={t('labelIp')} className="w-full bg-slate-800 p-3 rounded-xl outline-none" />
@@ -69,7 +71,7 @@ export const ScreenManager = ({ screens, onAdd, onDelete }: any) => {
                         {adding ? '...' : t('btnSave')}
                     </button>
                 </div>
-            </section>
+            </section>}
         </div>
     );
 };

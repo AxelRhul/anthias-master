@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { isValidHost } from '@/lib/validate';
+import { requireAdmin } from '@/lib/require-admin';
 import axios from 'axios';
 
 export async function GET() {
@@ -23,6 +24,9 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+    if (!(await requireAdmin())) {
+        return NextResponse.json({ error: "forbidden" }, { status: 403 });
+    }
     try {
         const body = await req.json();
         const ip = typeof body.ip === 'string' ? body.ip.trim() : '';

@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { requireAdmin } from '@/lib/require-admin';
 
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+    if (!(await requireAdmin())) {
+        return NextResponse.json({ error: "forbidden" }, { status: 403 });
+    }
     const { id } = await params;
     const numId = parseInt(id, 10);
     if (isNaN(numId)) {

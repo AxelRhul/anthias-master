@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
+import { useSession } from 'next-auth/react';
 import { Header } from '@/components/Header';
 import { ScreenManager } from '@/components/ScreenManager';
 import { BroadcastForm } from '@/components/BroadcastForm';
@@ -10,6 +11,8 @@ import { Save, X } from 'lucide-react';
 
 export default function MasterOps() {
   const t = useTranslations('modals');
+  const { data: session } = useSession();
+  const isAdmin = (session?.user as any)?.role === 'ADMIN';
   const [screens, setScreens] = useState<any[]>([]);
   const [assets, setAssets] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -101,7 +104,7 @@ export default function MasterOps() {
 
           <div className="grid grid-cols-12 gap-8">
             <div className="col-span-12 lg:col-span-4">
-              <ScreenManager screens={screens} onAdd={addScreen} onDelete={deleteScreen} />
+              <ScreenManager screens={screens} onAdd={addScreen} onDelete={deleteScreen} isAdmin={isAdmin} />
             </div>
 
             <div className="col-span-12 lg:col-span-8 space-y-8">
