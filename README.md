@@ -56,16 +56,42 @@ Open [http://localhost:3000](http://localhost:3000).
 ## Docker (Production)
 
 ```bash
-docker compose up nextjs-standalone --build
+docker compose up --build -d
 ```
+
+Starts two containers:
+- **nextjs-standalone** — Next.js app (internal port 3001)
+- **anthias-nginx** — Nginx reverse proxy, exposes **HTTPS on port 3000**
 
 The SQLite database is persisted in a named Docker volume (`sqlite_data` → `/app/data/prod.db`).  
-Prisma migrations run automatically on container startup via `docker-entrypoint.sh`.
+Prisma migrations run automatically on container startup via `docker-entrypoint.sh`.  
+A self-signed TLS certificate is generated automatically on first start and stored in the `nginx_certs` volume.
 
 ```
-PORT         : 3000
-DATABASE_URL : file:/app/data/prod.db  (overridable via env)
+Public URL  : https://<server-ip>:3000
+DATABASE_URL: file:/app/data/prod.db  (overridable via env)
 ```
+
+> The browser will warn about the self-signed certificate — click "Continue anyway". This is expected on a local network without a CA-signed certificate.
+
+### First admin account (in Docker)
+
+```bash
+docker exec -it nextjs-standalone-container npx tsx scripts/create-user.ts you@example.com "password" "Your Name"
+```
+
+### HTTPS & Microsoft login on a server
+
+Because Azure requires HTTPS redirect URIs, the Nginx container handles TLS termination.
+
+1. Set in your `.env`:
+   ```env
+   NEXTAUTH_URL=https://<server-ip>:3000
+   ```
+2. In **Azure Portal → App registrations → Authentication → Redirect URIs**, add:
+   ```
+   https://<server-ip>:3000/api/auth/callback/azure-ad
+   ```
 
 ## Environment Variables
 
