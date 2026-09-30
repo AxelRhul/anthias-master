@@ -9,13 +9,33 @@ services:
       - .env
     environment:
       NODE_ENV: production
-      PORT: "3000"
+      PORT: "3001"
       DATABASE_URL: "file:/app/data/prod.db"
-    ports:
-      - "3000:3000"
     volumes:
       - sqlite_data:/app/data
     restart: unless-stopped
 
+  nginx:
+    image: nginx:alpine
+    container_name: anthias-nginx
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - nginx_certs:/etc/nginx/certs
+    entrypoint: ["/bin/sh", "/entrypoint.sh"]
+    configs:
+      - source: nginx_entrypoint
+        target: /entrypoint.sh
+        mode: 0755
+    depends_on:
+      - nextjs-standalone
+    restart: unless-stopped
+
+configs:
+  nginx_entrypoint:
+    file: ./nginx/entrypoint.sh
+
 volumes:
   sqlite_data:
+  nginx_certs:
