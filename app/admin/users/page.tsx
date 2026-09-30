@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 import { CheckCircle, XCircle, ShieldCheck, Clock, Users } from "lucide-react";
 
 type User = { id: string; name: string | null; email: string | null; role: string; createdAt: string };
@@ -17,21 +18,29 @@ const ROLE_ICONS: Record<string, React.ReactNode> = {
 };
 
 export default function AdminUsersPage() {
+    const { data: session } = useSession();
+    const myId = (session?.user as any)?.id;
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
 
     const load = async () => {
-        const res = await fetch("/api/admin/users");
-        setUsers(await res.json());
-        setLoading(false);
+        try {
+            const res = await fetch("/api/admin/users");
+            const data = await res.json().catch(() => null);
+            if (res.ok && Array.isArray(data)) setUsers(data);
+            else console.error("[admin/users] GET failed", res.status, data);
+        } finally {
+            setLoading(false);
+        }
     };
 
     const setRole = async (id: string, role: string) => {
-        await fetch("/api/admin/users", {
+        const res = await fetch("/api/admin/users", {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ id, role }),
         });
+        if (!res.ok) console.error("[admin/users] PATCH failed", res.status, await res.json().catch(() => null));
         load();
     };
 
@@ -71,19 +80,20 @@ export default function AdminUsersPage() {
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="flex gap-2">
-                                                {user.role !== "ADMIN" && (
+                                                {user.id === myId && <span className="text-xs text-slate-500 italic">Vous</span>}
+                                                {user.id !== myId && user.role !== "ADMIN" && (
                                                     <button onClick={() => setRole(user.id, "ADMIN")}
                                                         className="px-3 py-1.5 text-xs font-bold bg-blue-600/20 hover:bg-blue-600/40 text-blue-400 rounded-xl transition flex items-center gap-1">
                                                         <ShieldCheck size={13} /> Admin
                                                     </button>
                                                 )}
-                                                {user.role !== "USER" && (
+                                                {user.id !== myId && user.role !== "USER" && (
                                                     <button onClick={() => setRole(user.id, "USER")}
                                                         className="px-3 py-1.5 text-xs font-bold bg-emerald-600/20 hover:bg-emerald-600/40 text-emerald-400 rounded-xl transition flex items-center gap-1">
                                                         <CheckCircle size={13} /> Approuver
                                                     </button>
                                                 )}
-                                                {user.role !== "PENDING" && (
+                                                {user.id !== myId && user.role !== "PENDING" && (
                                                     <button onClick={() => setRole(user.id, "PENDING")}
                                                         className="px-3 py-1.5 text-xs font-bold bg-rose-600/20 hover:bg-rose-600/40 text-rose-400 rounded-xl transition flex items-center gap-1">
                                                         <XCircle size={13} /> Révoquer

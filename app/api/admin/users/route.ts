@@ -23,12 +23,16 @@ export async function GET() {
 }
 
 export async function PATCH(req: Request) {
-    if (!(await requireAdmin())) {
+    const session = await requireAdmin();
+    if (!session) {
         return NextResponse.json({ error: "forbidden" }, { status: 403 });
     }
     const { id, role } = await req.json();
     if (!id || !VALID_ROLES.includes(role)) {
         return NextResponse.json({ error: "invalid_params" }, { status: 400 });
+    }
+    if (id === (session.user as any).id) {
+        return NextResponse.json({ error: "cannot_change_own_role" }, { status: 400 });
     }
     const user = await prisma.user.update({
         where: { id },
