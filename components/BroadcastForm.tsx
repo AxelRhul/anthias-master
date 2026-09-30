@@ -1,3 +1,5 @@
+"use client";
+import { useState, useEffect, useRef } from 'react';
 import { Send } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
@@ -5,6 +7,23 @@ export const BroadcastForm = ({ onSubmit, loading }: any) => {
     const t = useTranslations('Broadcast');
     const now = new Date().toISOString().slice(0, 16);
     const nextYear = new Date(Date.now() + 31536000000).toISOString().slice(0, 16);
+    const [isVideo, setIsVideo] = useState(false);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const prevUrlRef = useRef<string | null>(null);
+
+    useEffect(() => {
+        return () => { if (prevUrlRef.current) URL.revokeObjectURL(prevUrlRef.current); };
+    }, []);
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (prevUrlRef.current) { URL.revokeObjectURL(prevUrlRef.current); prevUrlRef.current = null; }
+        if (!file) { setPreviewUrl(null); setIsVideo(false); return; }
+        const url = URL.createObjectURL(file);
+        prevUrlRef.current = url;
+        setPreviewUrl(url);
+        setIsVideo(file.type.startsWith('video/'));
+    };
 
     return (
         <form onSubmit={onSubmit} className="bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-xl">
@@ -12,15 +31,43 @@ export const BroadcastForm = ({ onSubmit, loading }: any) => {
             <div className="grid grid-cols-2 gap-6">
                 <div className="col-span-2">
                     <label className="text-xs font-black text-slate-500 mb-2 block">{t('file')}</label>
-                    <input type="file" name="image" required className="w-full bg-slate-800 p-4 rounded-2xl border-2 border-dashed border-slate-700" />
+                    <input
+                        type="file"
+                        name="file"
+                        accept="image/*,video/*"
+                        required
+                        onChange={handleFileChange}
+                        className="w-full bg-slate-800 p-4 rounded-2xl border-2 border-dashed border-slate-700"
+                    />
+                    {previewUrl && (
+                        <div className="mt-3 rounded-xl overflow-hidden border border-slate-700 bg-black flex items-center justify-center max-h-48">
+                            {isVideo
+                                ? <video src={previewUrl} controls className="max-h-48 w-full object-contain" />
+                                : <img src={previewUrl} className="max-h-48 object-contain" />
+                            }
+                        </div>
+                    )}
                 </div>
                 <div className="col-span-2">
                     <label className="text-xs font-black text-slate-500 mb-2 block">{t('assetTitle')}</label>
                     <input name="name" maxLength={255} className="w-full bg-slate-800 p-4 rounded-2xl outline-none" />
                 </div>
                 <div>
-                    <label className="text-xs font-black text-slate-500 mb-2 block">{t('duration')}</label>
-                    <input name="duration" type="number" defaultValue="10" min="1" max="86400" className="w-full bg-slate-800 p-3 rounded-xl" />
+                    <label className="text-xs font-black text-slate-500 mb-2 block">
+                        {t('duration')}
+                        {isVideo && <span className="ml-2 text-purple-400 font-normal normal-case">{t('durationVideoHint')}</span>}
+                    </label>
+                    <input
+                        name="duration"
+                        type="number"
+                        value={isVideo ? 0 : undefined}
+                        defaultValue={isVideo ? undefined : 10}
+                        min="0"
+                        max="86400"
+                        disabled={isVideo}
+                        readOnly={isVideo}
+                        className={`w-full bg-slate-800 p-3 rounded-xl ${isVideo ? 'opacity-40 cursor-not-allowed' : ''}`}
+                    />
                 </div>
                 <div>
                     <label className="text-xs font-black text-slate-500 mb-2 block">{t('order')}</label>

@@ -19,7 +19,7 @@ const formatAnthiasDate = (d: any) => {
 export async function POST(req: Request) {
     try {
         const data = await req.formData();
-        const file = data.get('image') as File;
+        const file = data.get('file') as File;
         if (!file) return NextResponse.json({ error: "no_file" }, { status: 400 });
 
         if (file.size > MAX_FILE_SIZE) {
@@ -33,7 +33,8 @@ export async function POST(req: Request) {
 
         const rawName = data.get('name') as string;
         const name = (rawName?.trim().slice(0, 255)) || file.name.slice(0, 255);
-        const duration = Math.floor(Number(data.get('duration'))) || 10;
+        const isVideo = mimeType.startsWith('video/');
+        const duration = isVideo ? 0 : (Math.floor(Number(data.get('duration'))) || 10);
         const play_order = Math.floor(Number(data.get('play_order'))) || 0;
         const start_date = data.get('start_date') as string;
         const end_date = data.get('end_date') as string;

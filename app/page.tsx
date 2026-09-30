@@ -63,10 +63,22 @@ export default function MasterOps() {
 
   const openViewer = async (id: string, name: string) => {
     setLoading(true);
-    const res = await fetch(`/api/assets/${id}`);
-    const data = await res.json();
-    if (data.content) setPreview({ ...data, name });
+    try {
+      const res = await fetch(`/api/assets/${id}/stream`);
+      if (!res.ok) throw new Error('fetch failed');
+      const contentType = res.headers.get('content-type') ?? '';
+      const blob = await res.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      setPreview({ objectUrl, mimetype: contentType, name });
+    } catch {
+      setPreview(null);
+    }
     setLoading(false);
+  };
+
+  const closePreview = () => {
+    if (preview?.objectUrl) URL.revokeObjectURL(preview.objectUrl);
+    setPreview(null);
   };
 
   const saveChanges = async (e: React.FormEvent) => {
@@ -102,10 +114,20 @@ export default function MasterOps() {
         {toast && <Toast message={toast} onClose={() => setToast(null)} />}
 
         {preview && (
-            <div className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-12" onClick={() => setPreview(null)}>
+            <div className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-12" onClick={closePreview}>
               <div className="relative max-w-5xl w-full flex flex-col items-center">
                 <h3 className="text-2xl font-bold mb-4">{preview.name}</h3>
-                <img src={`data:${preview.mimetype};base64,${preview.content}`} className="max-w-full max-h-[75vh] rounded-xl shadow-2xl border-2 border-slate-800" />
+                {preview.mimetype?.startsWith('video/') ? (
+                  <video
+                    src={preview.objectUrl}
+                    controls
+                    autoPlay
+                    className="max-w-full max-h-[75vh] rounded-xl shadow-2xl border-2 border-slate-800"
+                    onClick={e => e.stopPropagation()}
+                  />
+                ) : (
+                  <img src={preview.objectUrl} className="max-w-full max-h-[75vh] rounded-xl shadow-2xl border-2 border-slate-800" />
+                )}
                 <p className="mt-6 text-slate-500 italic">{t('closeHint')}</p>
               </div>
             </div>

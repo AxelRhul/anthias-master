@@ -19,6 +19,7 @@
     "order": "Ordre",
     "start": "Date de Début",
     "end": "Date de Fin",
+    "durationVideoHint": "(auto pour vidéo)",
     "btnSubmit": "DIFFUSER SUR TOUT LE PARC",
     "sending": "TRANSFERT EN COURS..."
   },

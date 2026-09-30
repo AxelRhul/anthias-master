@@ -19,6 +19,7 @@
     "order": "Order",
     "start": "Start Date",
     "end": "End Date",
+    "durationVideoHint": "(auto for video)",
     "btnSubmit": "DEPLOY TO ALL SCREENS",
     "sending": "UPLOADING..."
   },
