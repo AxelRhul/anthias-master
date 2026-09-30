@@ -6,6 +6,7 @@ A **Next.js** web application for centrally managing an [Anthias](https://github
 
 - **Group broadcast** — push an image or video to the entire fleet in one click
 - **Screen management** — register any Anthias instance by IP/hostname, remove it if needed
+- **Media sync** — copy the media of an existing screen to a new or out-of-date one, with one click on the sync icon (automatic when a screen is added)
 - **Media library** — view and edit already-deployed assets (name, duration, dates, enabled state)
 - **Authentication** — login via Microsoft (Entra ID / Azure AD) or email + password
 - **Role-based access** — three roles: `ADMIN`, `USER`, `PENDING`; new users wait for approval
@@ -139,6 +140,15 @@ npx tsx scripts/create-user.ts <email> <password> [display name]
 
 Users created this way are automatically assigned the `ADMIN` role. Running the script again for an existing email resets its password and restores the `ADMIN` role (useful to recover a locked-out admin).
 
+## Media Sync
+
+Adding a screen does not copy existing media by itself. The sync (automatic right after adding a screen, or via the sync icon on each screen) works as follows:
+
+- The source is the first other screen that responds, ordered by creation.
+- Media are matched by **name**: any media the target does not have is downloaded from the source and re-created on the target (same name, dates, order, enabled state).
+- It is one-way and additive: nothing is deleted on the target, and a media already present (same name) is skipped, so running it again is safe.
+- Videos are re-created with a duration of `0`, as required by the Anthias API.
+
 ## Role System
 
 | Role | Access |
@@ -198,6 +208,7 @@ An admin cannot change their own role (prevents accidental self-demotion).
 | `GET` | `/api/screens` | USER+ | List all registered screens with online status |
 | `POST` | `/api/screens` | ADMIN | Add a screen `{ ip, label }` |
 | `DELETE` | `/api/screens/[id]` | ADMIN | Remove a screen |
+| `POST` | `/api/screens/[id]/sync` | USER+ | Copy missing media from another online screen to this one |
 | `GET` | `/api/assets` | USER+ | Fetch asset list from the first available screen |
 | `GET` | `/api/assets/[id]` | USER+ | Retrieve asset content (base64) |
 | `GET` | `/api/assets/[id]/stream` | USER+ | Retrieve asset as binary (image or video) for the viewer |
