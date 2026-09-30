@@ -8,6 +8,14 @@ const decodeHtml = (s: string) => {
   return el.value;
 };
 
+const VIDEO_EXTS = new Set(['mp4', 'webm', 'mov', 'avi', 'mkv', 'ogv', 'm4v']);
+
+const isVideo = (asset: any) => {
+  if (asset.mimetype?.startsWith('video')) return true;
+  const ext = asset.uri?.split('.').pop()?.toLowerCase();
+  return ext ? VIDEO_EXTS.has(ext) : false;
+};
+
 export const AssetLibrary = ({ assets, onView, onEdit }: any) => {
   const t = useTranslations('Library');
   return (
@@ -25,7 +33,7 @@ export const AssetLibrary = ({ assets, onView, onEdit }: any) => {
           {assets.map((asset: any) => (
               <tr key={asset.asset_id} className="hover:bg-slate-800/30 transition">
                 <td className="py-4 font-medium flex items-center gap-2">
-                  {asset.mimetype?.startsWith('video/') ? <Film size={14} className="text-purple-400 shrink-0" /> : <Image size={14} className="text-blue-400 shrink-0" />}
+                  {isVideo(asset) ? <Film size={14} className="text-purple-400 shrink-0" /> : <Image size={14} className="text-blue-400 shrink-0" />}
                   {decodeHtml(asset.name ?? '')}
                 </td>
                 <td className="py-4">

@@ -8,7 +8,7 @@ export async function GET() {
 
     try {
         const res = await axios.get(`http://${screens[0].ip.trim()}/api/v2/assets`, { timeout: 4000 });
-        return NextResponse.json(res.data);
+return NextResponse.json(res.data);
     } catch (err) {
         return NextResponse.json({ error: "Impossible de lister" }, { status: 500 });
     }
