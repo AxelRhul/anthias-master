@@ -137,17 +137,18 @@ Users can be created manually with the provided script:
 npx tsx scripts/create-user.ts <email> <password> [display name]
 ```
 
-Users created this way are automatically assigned the `ADMIN` role.
+Users created this way are automatically assigned the `ADMIN` role. Running the script again for an existing email resets its password and restores the `ADMIN` role (useful to recover a locked-out admin).
 
 ## Role System
 
 | Role | Access |
 |------|--------|
-| `ADMIN` | Full access + user management (`/admin/users`) |
-| `USER` | Full access to the dashboard |
+| `ADMIN` | Full access: screen management (add / remove), media, and user management (`/admin/users`) |
+| `USER` | Media only: broadcast, view, edit assets. Can see the screen fleet but cannot add or remove screens |
 | `PENDING` | Blocked — sees a waiting page until an admin approves them |
 
-New Microsoft sign-ins start as `PENDING`. Admins approve them at `/admin/users`.
+New Microsoft sign-ins start as `PENDING`. Admins approve them at `/admin/users`.  
+An admin cannot change their own role (prevents accidental self-demotion).
 
 ## Project Structure
 
@@ -195,10 +196,11 @@ New Microsoft sign-ins start as `PENDING`. Admins approve them at `/admin/users`
 | Method | Route | Auth | Description |
 |--------|-------|------|-------------|
 | `GET` | `/api/screens` | USER+ | List all registered screens with online status |
-| `POST` | `/api/screens` | USER+ | Add a screen `{ ip, label }` |
-| `DELETE` | `/api/screens/[id]` | USER+ | Remove a screen |
+| `POST` | `/api/screens` | ADMIN | Add a screen `{ ip, label }` |
+| `DELETE` | `/api/screens/[id]` | ADMIN | Remove a screen |
 | `GET` | `/api/assets` | USER+ | Fetch asset list from the first available screen |
 | `GET` | `/api/assets/[id]` | USER+ | Retrieve asset content (base64) |
+| `GET` | `/api/assets/[id]/stream` | USER+ | Retrieve asset as binary (image or video) for the viewer |
 | `PUT` | `/api/assets/[id]` | USER+ | Update asset metadata on all screens |
 | `POST` | `/api/broadcast` | USER+ | Upload file + create asset on all screens |
 | `GET` | `/api/admin/users` | ADMIN | List all users |
