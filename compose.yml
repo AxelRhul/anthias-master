@@ -5,6 +5,8 @@ services:
       dockerfile: Dockerfile
     image: nextjs-standalone-image
     container_name: nextjs-standalone-container
+    env_file:
+      - .env
     environment:
       NODE_ENV: production
       PORT: "3000"
