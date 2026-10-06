@@ -12,7 +12,7 @@ export const Header = ({ loading, onRefresh }: { loading: boolean; onRefresh: ()
     const isAdmin = isAdminRole(session?.user?.role);
 
     return (
-        <header className="flex justify-between items-center border-b border-slate-800 pb-6">
+        <header className="sticky top-0 z-40 flex justify-between items-center border-b border-slate-800 bg-slate-950/90 backdrop-blur-sm py-4">
             <h1 className="text-3xl font-black text-blue-500 flex items-center gap-3 italic">
                 <Monitor size={36} /> {t('title')}
             </h1>

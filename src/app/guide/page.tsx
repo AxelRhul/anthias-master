@@ -13,7 +13,7 @@ export default async function GuidePage() {
     return (
         <div className="min-h-screen bg-slate-950 text-slate-100 p-8">
             <div className="max-w-6xl mx-auto space-y-8">
-                <header className="flex flex-wrap justify-between items-center gap-4 border-b border-slate-800 pb-6">
+                <header className="sticky top-0 z-40 flex flex-wrap justify-between items-center gap-4 border-b border-slate-800 bg-slate-950/90 backdrop-blur-sm py-4">
                     <div>
                         <h1 className="text-3xl font-black text-blue-500 flex items-center gap-3 italic">
                             <BookOpen size={32} /> {t('title')}
@@ -29,7 +29,7 @@ export default async function GuidePage() {
                 </header>
 
                 <div className="grid grid-cols-12 gap-8">
-                    <nav className="col-span-12 lg:col-span-3 lg:sticky lg:top-8 lg:self-start bg-slate-900 border border-slate-800 rounded-3xl p-6">
+                    <nav className="col-span-12 lg:col-span-3 lg:sticky lg:top-36 lg:self-start bg-slate-900 border border-slate-800 rounded-3xl p-6">
                         <h2 className="text-xs font-black uppercase text-slate-500 mb-3">{t('toc')}</h2>
                         <ul className="space-y-2">
                             {GUIDE_SECTIONS.map(section => (
@@ -50,7 +50,7 @@ export default async function GuidePage() {
                             const faq = t.has(`${base}.items`) ? (t.raw(`${base}.items`) as FaqItem[]) : [];
 
                             return (
-                                <section key={section.id} id={section.id} className="scroll-mt-8 bg-slate-900 border border-slate-800 rounded-3xl p-8 space-y-5">
+                                <section key={section.id} id={section.id} className="scroll-mt-36 bg-slate-900 border border-slate-800 rounded-3xl p-8 space-y-5">
                                     <h2 className="text-2xl font-bold text-emerald-400 flex flex-wrap items-center gap-3">
                                         {t(`${base}.title`)}
                                         {section.adminOnly && (
