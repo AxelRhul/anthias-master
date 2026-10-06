@@ -1,5 +1,6 @@
 "use client";
-import { Monitor, RefreshCcw, LogOut, Users } from 'lucide-react';
+import Link from 'next/link';
+import { Monitor, RefreshCcw, LogOut, Users, BookOpen } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 import { signOut, useSession } from "next-auth/react";
@@ -11,7 +12,7 @@ export const Header = ({ loading, onRefresh }: { loading: boolean; onRefresh: ()
     const isAdmin = isAdminRole(session?.user?.role);
 
     return (
-        <header className="flex justify-between items-center border-b border-slate-800 pb-6">
+        <header className="sticky top-0 z-40 flex justify-between items-center border-b border-slate-800 bg-slate-950/90 backdrop-blur-sm py-4">
             <h1 className="text-3xl font-black text-blue-500 flex items-center gap-3 italic">
                 <Monitor size={36} /> {t('title')}
             </h1>
@@ -19,6 +20,9 @@ export const Header = ({ loading, onRefresh }: { loading: boolean; onRefresh: ()
                 <button onClick={onRefresh} className="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-xl flex items-center gap-2 transition">
                     <RefreshCcw size={18} className={loading ? "animate-spin" : ""} /> {t('refresh')}
                 </button>
+                <Link href="/guide" className="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-xl flex items-center gap-2 transition">
+                    <BookOpen size={18} /> {t('guide')}
+                </Link>
                 <LocaleSwitcher />
                 {isAdmin && (
                     <a href="/admin/users"

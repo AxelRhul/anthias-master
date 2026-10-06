@@ -1,7 +1,152 @@
 {
   "Header": {
     "title": "ANTHIAS MASTER",
-    "refresh": "Refresh"
+    "refresh": "Refresh",
+    "guide": "Guide"
+  },
+  "Guide": {
+    "title": "User guide",
+    "subtitle": "Everything you need to know to broadcast and manage your media on the screen fleet.",
+    "back": "Back to the dashboard",
+    "toc": "Contents",
+    "adminBadge": "Administrators",
+    "missingCapture": "Screenshot to add",
+    "openImage": "Click to enlarge",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "zoomReset": "Original size",
+    "closeImage": "Close",
+    "zoomHint": "Wheel or buttons to zoom, drag to move, double-click to enlarge, Esc to close",
+    "sections": {
+      "overview": {
+        "title": "Overview",
+        "intro": "Anthias Master sends an image or a video to all your screens at once. The dashboard is organized in two columns.",
+        "steps": [
+          "On the left, the \"TV Fleet\": the list of screens (Raspberry Pi) with their connection status.",
+          "On the right, the \"Group Broadcast\": the form to send a new media to the whole fleet.",
+          "Below the form, the \"Media Library\": every media already broadcast, which you can view, edit or delete.",
+          "At the top: Refresh (reloads the data), Guide (this page), the FR / EN language switch and the sign-out button. Administrators also get an icon to manage users."
+        ],
+        "images": {
+          "dashboard": "The dashboard: screen fleet, broadcast form and media library."
+        }
+      },
+      "access": {
+        "title": "Signing in and access",
+        "intro": "Sign in with your Microsoft account or with your email and password.",
+        "steps": [
+          "On the login page, click \"Continue with Microsoft\" or enter your email and password.",
+          "On your first sign-in your account is \"pending\": an administrator must approve it before you can use the application.",
+          "Once approved, sign out and sign in again: the dashboard opens.",
+          "After 5 wrong passwords, sign-in is blocked for 15 minutes.",
+          "User: broadcast and manage media. Administrator: also approves accounts and manages the devices. Super administrator: also sets each device's login."
+        ],
+        "images": {
+          "login": "The login page.",
+          "pending": "The waiting page shown until your account is approved."
+        }
+      },
+      "broadcast": {
+        "title": "Broadcasting a media",
+        "intro": "The \"Group Broadcast\" form sends the file to every screen of the fleet at once.",
+        "steps": [
+          "Pick a file: image (JPEG, PNG, GIF, WebP) or video (MP4, WebM, MOV, Ogg), 100 MB maximum. A preview appears under the field so you can check it is the right one.",
+          "Give the media a title (optional: the file name is used otherwise).",
+          "Duration: for an image, how long it is displayed in seconds (10 by default). For a video the field is locked: the video's own length is used automatically.",
+          "Order: the position of the media in the playback loop (0 by default).",
+          "Start date and end date: the media is only displayed during this period (by default, from now to one year later).",
+          "Click \"DEPLOY TO ALL SCREENS\". A message confirms the broadcast is done and the media appears in the library."
+        ],
+        "tip": "If a screen was off during the broadcast it does not receive the media: once it is back on, click that screen's sync icon (see \"The screens of the fleet\").",
+        "images": {
+          "broadcastForm": "The broadcast form with an image selected and its preview.",
+          "broadcastVideo": "With a video, the Duration field is locked: the duration is automatic."
+        }
+      },
+      "library": {
+        "title": "The media library",
+        "intro": "The library lists the broadcast media. Each row shows the media type (image or video), its name, its status and three actions.",
+        "steps": [
+          "Status: ACTIVE when the media is being broadcast, OFF when it is disabled.",
+          "The eye opens the media full size (a player for a video). Click anywhere to close.",
+          "The pencil lets you change the name, the duration, the state (active or inactive) and the dates, then save.",
+          "To stop a media temporarily without losing it, set it to \"Inactive\" instead of deleting it."
+        ],
+        "images": {
+          "library": "The library with active and disabled media.",
+          "assetPreview": "A media shown full size.",
+          "assetEdit": "The window to edit a media."
+        }
+      },
+      "delete": {
+        "title": "Deleting media",
+        "intro": "Deletion is permanent: the media is removed from every screen of the fleet and cannot be recovered.",
+        "steps": [
+          "Click the trash can on a row, then confirm in the window that opens.",
+          "To clean up quickly, the \"Delete OFF\" button at the top of the library deletes every disabled media at once (it only appears when there are some). A confirmation tells you how many will be deleted."
+        ],
+        "tip": "If you are not sure you will never need a media again, disable it instead of deleting it.",
+        "images": {
+          "deleteConfirm": "The confirmation before a permanent deletion."
+        }
+      },
+      "devices": {
+        "title": "The screens of the fleet",
+        "intro": "The left column shows each screen with its name, address and status.",
+        "steps": [
+          "Green Wi-Fi icon: the screen answers. Red crossed icon: the screen is unreachable (powered off, off the network...).",
+          "Orange shield icon: the screen answers but refuses the application's connection. Tell the super administrator, who can enter its login.",
+          "The sync icon (two arrows) copies onto this screen the media it does not have yet, from another online screen. It deletes nothing, and media are compared by name.",
+          "A message shows the result: number of media copied, failures, or \"device already up to date\".",
+          "Adding, removing and setting the login of screens is handled by administrators and is not covered here."
+        ],
+        "images": {
+          "deviceStatus": "The screen list: connection status and sync icon."
+        }
+      },
+      "users": {
+        "title": "Managing access",
+        "intro": "Administrators only. The \"users\" icon at the top of the page opens the list of accounts.",
+        "steps": [
+          "A new account shows up as \"pending\" with an \"Approve\" button: click it to grant access (User role).",
+          "After that, a dropdown lets you choose between User and Administrator.",
+          "You cannot change your own role. Only the super administrator can change another administrator."
+        ],
+        "images": {
+          "adminUsers": "User management."
+        }
+      },
+      "faq": {
+        "title": "Frequently asked questions",
+        "intro": "",
+        "items": [
+          {
+            "q": "My file is rejected.",
+            "a": "Only JPEG, PNG, GIF, WebP, MP4, WebM, MOV and Ogg files are accepted, up to 100 MB. The file's content is checked: renaming the extension is not enough, and SVG files are not accepted."
+          },
+          {
+            "q": "My media does not show on the screen.",
+            "a": "Check that its status is ACTIVE, that today is between its start and end dates, and that the screen is online. If the screen was off during the broadcast, use the sync."
+          },
+          {
+            "q": "I am stuck on \"Access pending\".",
+            "a": "An administrator has to approve your account. Once done, sign out and sign in again."
+          },
+          {
+            "q": "\"Too many attempts\" appears when signing in.",
+            "a": "Too many wrong passwords were entered. Wait 15 minutes before trying again."
+          },
+          {
+            "q": "The screenshots are too small to read.",
+            "a": "Click a screenshot to open it full screen. You can then zoom with the wheel or the +/- buttons, move the image by dragging it, double-click to enlarge, and close with Esc."
+          },
+          {
+            "q": "How do I change the language?",
+            "a": "With the FR / EN buttons at the top of the page."
+          }
+        ]
+      }
+    }
   },
   "Screens": {
     "title": "TV Fleet",
@@ -11,6 +156,8 @@
     "btnSave": "Save",
     "invalidIp": "Invalid IP address or hostname",
     "sync": "Sync media from another device",
+    "rename": "Rename the device",
+    "renameTitle": "Rename the device",
     "credentials": "Device login",
     "credentialsTitle": "Device login",
     "credentialsHint": "Basic authentication enabled in the Anthias settings. The password is encrypted and never shown again.",
@@ -48,6 +195,8 @@
     "syncNoSource": "No other online device to copy from",
     "syncError": "Sync failed",
     "syncAuthFailed": "The device refuses the connection: login missing or incorrect",
+    "renameSaved": "Device renamed",
+    "renameError": "Could not rename the device",
     "credentialsSaved": "Login saved",
     "credentialsRemoved": "Login removed",
     "credentialsError": "Could not save the login",

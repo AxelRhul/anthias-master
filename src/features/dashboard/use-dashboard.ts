@@ -15,6 +15,7 @@ export function useDashboard() {
   const isAdmin = isAdminRole(session?.user?.role);
   const superAdmin = isSuperAdmin(session?.user?.role);
   const [credentialsFor, setCredentialsFor] = useState<Screen | null>(null);
+  const [renaming, setRenaming] = useState<Screen | null>(null);
   const [screens, setScreens] = useState<Screen[]>([]);
   const [assets, setAssets] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(true);
@@ -92,6 +93,22 @@ export function useDashboard() {
     const created = await res.json();
     await loadAll();
     syncScreen(created.id);
+  };
+
+  const saveRename = async (label: string) => {
+    if (!renaming) return;
+    const res = await fetch(`/api/screens/${renaming.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ label }),
+    });
+    if (res.ok) {
+      setRenaming(null);
+      setToast(t('renameSaved'));
+      loadAll();
+    } else {
+      setToast(t('renameError'));
+    }
   };
 
   const saveCredentials = async (username: string, password: string) => {
@@ -190,7 +207,10 @@ export function useDashboard() {
 
   return {
     isAdmin, isSuperAdmin: superAdmin, screens, assets, loading, toast, syncingId, confirm, preview, editingAsset,
-    credentialsFor,
+    credentialsFor, renaming,
+    openRename: setRenaming,
+    closeRename: () => setRenaming(null),
+    saveRename,
     dismissToast: () => setToast(null),
     setEditingAsset,
     openCredentials: setCredentialsFor,

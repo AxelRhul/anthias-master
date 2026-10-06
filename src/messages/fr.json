@@ -1,7 +1,152 @@
 {
   "Header": {
     "title": "ANTHIAS MASTER",
-    "refresh": "Actualiser"
+    "refresh": "Actualiser",
+    "guide": "Guide"
+  },
+  "Guide": {
+    "title": "Guide d'utilisation",
+    "subtitle": "Tout ce qu'il faut savoir pour diffuser et gérer vos médias sur le parc d'écrans.",
+    "back": "Retour au tableau de bord",
+    "toc": "Sommaire",
+    "adminBadge": "Administrateurs",
+    "missingCapture": "Capture à ajouter",
+    "openImage": "Cliquer pour agrandir",
+    "zoomIn": "Zoom avant",
+    "zoomOut": "Zoom arrière",
+    "zoomReset": "Taille d'origine",
+    "closeImage": "Fermer",
+    "zoomHint": "Molette ou boutons pour zoomer, glisser pour déplacer, double-clic pour agrandir, Échap pour fermer",
+    "sections": {
+      "overview": {
+        "title": "Vue d'ensemble",
+        "intro": "Anthias Master permet d'envoyer une image ou une vidéo sur tous vos écrans en une seule fois. Le tableau de bord est organisé en deux colonnes.",
+        "steps": [
+          "À gauche, le « Parc de TV » : la liste des écrans (Raspberry Pi) avec leur état de connexion.",
+          "À droite, la « Diffusion Groupée » : le formulaire pour envoyer un nouveau média sur tout le parc.",
+          "Sous le formulaire, la « Médiathèque » : tous les médias déjà diffusés, que vous pouvez voir, modifier ou supprimer.",
+          "En haut : Actualiser (recharge les données), Guide (cette page), le choix de la langue FR / EN et le bouton de déconnexion. Les administrateurs voient en plus une icône pour gérer les utilisateurs."
+        ],
+        "images": {
+          "dashboard": "Le tableau de bord : parc d'écrans, formulaire de diffusion et médiathèque."
+        }
+      },
+      "access": {
+        "title": "Se connecter et accès",
+        "intro": "Connectez-vous avec votre compte Microsoft ou avec votre email et votre mot de passe.",
+        "steps": [
+          "Sur la page de connexion, cliquez sur « Continuer avec Microsoft » ou saisissez votre email et votre mot de passe.",
+          "À la première connexion, votre compte est « en attente » : un administrateur doit l'approuver avant que vous puissiez utiliser l'application.",
+          "Une fois approuvé, déconnectez-vous puis reconnectez-vous : le tableau de bord s'ouvre.",
+          "Après 5 mots de passe incorrects, la connexion est bloquée pendant 15 minutes.",
+          "Utilisateur : diffuser et gérer les médias. Administrateur : en plus, approuver les comptes et gérer les appareils. Super administrateur : en plus, régler l'accès de chaque appareil."
+        ],
+        "images": {
+          "login": "La page de connexion.",
+          "pending": "La page d'attente affichée tant que votre compte n'est pas approuvé."
+        }
+      },
+      "broadcast": {
+        "title": "Diffuser un média",
+        "intro": "Le formulaire « Diffusion Groupée » envoie le fichier sur tous les écrans du parc en une seule fois.",
+        "steps": [
+          "Choisissez un fichier : image (JPEG, PNG, GIF, WebP) ou vidéo (MP4, WebM, MOV, Ogg), 100 Mo maximum. Un aperçu s'affiche sous le champ pour vérifier que c'est le bon.",
+          "Donnez un titre au média (facultatif : le nom du fichier est utilisé sinon).",
+          "Durée : pour une image, le temps d'affichage en secondes (10 par défaut). Pour une vidéo, le champ est verrouillé : la durée de la vidéo est utilisée automatiquement.",
+          "Ordre : la position du média dans la boucle de lecture (0 par défaut).",
+          "Date de début et date de fin : le média n'est affiché que pendant cette période (par défaut, de maintenant à dans un an).",
+          "Cliquez sur « DIFFUSER SUR TOUT LE PARC ». Un message confirme la fin de la diffusion et le média apparaît dans la médiathèque."
+        ],
+        "tip": "Si un écran était éteint pendant la diffusion, il ne reçoit pas le média : une fois rallumé, cliquez sur l'icône de synchronisation de cet écran (voir « Les écrans du parc »).",
+        "images": {
+          "broadcastForm": "Le formulaire de diffusion avec une image sélectionnée et son aperçu.",
+          "broadcastVideo": "Avec une vidéo, le champ Durée est verrouillé : la durée est automatique."
+        }
+      },
+      "library": {
+        "title": "La médiathèque",
+        "intro": "La médiathèque liste les médias diffusés. Chaque ligne affiche le type du média (image ou vidéo), son nom, son statut et trois actions.",
+        "steps": [
+          "Statut : ACTIF si le média est diffusé, OFF s'il est désactivé.",
+          "L'œil ouvre le média en grand (lecteur pour une vidéo). Cliquez n'importe où pour fermer.",
+          "Le crayon permet de modifier le nom, la durée, l'état (actif ou inactif) et les dates, puis d'enregistrer.",
+          "Pour arrêter temporairement un média sans le perdre, passez-le en « Inactif » plutôt que de le supprimer."
+        ],
+        "images": {
+          "library": "La médiathèque avec des médias actifs et désactivés.",
+          "assetPreview": "L'aperçu d'un média en grand.",
+          "assetEdit": "La fenêtre de modification d'un média."
+        }
+      },
+      "delete": {
+        "title": "Supprimer des médias",
+        "intro": "La suppression est définitive : le média est retiré de tous les écrans du parc et ne peut pas être récupéré.",
+        "steps": [
+          "Cliquez sur la corbeille d'une ligne, puis confirmez dans la fenêtre qui s'ouvre.",
+          "Pour faire le ménage rapidement, le bouton « Supprimer les OFF » en haut de la médiathèque supprime d'un coup tous les médias désactivés (il n'apparaît que s'il y en a). Une confirmation indique combien de médias seront supprimés."
+        ],
+        "tip": "Si vous n'êtes pas sûr de ne plus avoir besoin d'un média, désactivez-le au lieu de le supprimer.",
+        "images": {
+          "deleteConfirm": "La confirmation avant une suppression définitive."
+        }
+      },
+      "devices": {
+        "title": "Les écrans du parc",
+        "intro": "La colonne de gauche montre chaque écran avec son nom, son adresse et son état.",
+        "steps": [
+          "Icône Wi-Fi verte : l'écran répond. Icône barrée rouge : l'écran est injoignable (éteint, déconnecté du réseau…).",
+          "Icône de bouclier orange : l'écran répond mais refuse la connexion de l'application. Prévenez le super administrateur, qui peut renseigner ses identifiants.",
+          "L'icône de synchronisation (deux flèches) copie sur cet écran les médias qu'il n'a pas encore, depuis un autre écran en ligne. Elle ne supprime rien, et la comparaison se fait sur le nom des médias.",
+          "Un message indique le résultat : nombre de médias copiés, échecs, ou « appareil déjà à jour ».",
+          "L'ajout, la suppression et les identifiants des écrans sont gérés par les administrateurs et ne sont pas détaillés ici."
+        ],
+        "images": {
+          "deviceStatus": "La liste des écrans : état de connexion et icône de synchronisation."
+        }
+      },
+      "users": {
+        "title": "Gérer les accès",
+        "intro": "Réservé aux administrateurs. L'icône « utilisateurs » en haut de la page ouvre la liste des comptes.",
+        "steps": [
+          "Un nouveau compte apparaît « en attente » avec un bouton « Approuver » : cliquez dessus pour lui donner accès (rôle Utilisateur).",
+          "Ensuite, un menu déroulant permet de choisir entre Utilisateur et Administrateur.",
+          "Vous ne pouvez pas modifier votre propre rôle. Seul le super administrateur peut modifier un autre administrateur."
+        ],
+        "images": {
+          "adminUsers": "La gestion des utilisateurs."
+        }
+      },
+      "faq": {
+        "title": "Questions fréquentes",
+        "intro": "",
+        "items": [
+          {
+            "q": "Mon fichier est refusé.",
+            "a": "Seuls les formats JPEG, PNG, GIF, WebP, MP4, WebM, MOV et Ogg sont acceptés, jusqu'à 100 Mo. Le contenu du fichier est vérifié : renommer l'extension ne suffit pas, et les SVG ne sont pas acceptés."
+          },
+          {
+            "q": "Mon média n'apparaît pas sur l'écran.",
+            "a": "Vérifiez que son statut est ACTIF, que la date du jour est comprise entre sa date de début et sa date de fin, et que l'écran est en ligne. Si l'écran était éteint pendant la diffusion, utilisez la synchronisation."
+          },
+          {
+            "q": "Je reste sur « Accès en attente ».",
+            "a": "Un administrateur doit approuver votre compte. Une fois fait, déconnectez-vous puis reconnectez-vous."
+          },
+          {
+            "q": "« Trop de tentatives » s'affiche à la connexion.",
+            "a": "Trop de mots de passe incorrects ont été saisis. Attendez 15 minutes avant de réessayer."
+          },
+          {
+            "q": "Les captures sont trop petites pour lire le texte.",
+            "a": "Cliquez sur une capture pour l'ouvrir en plein écran. Vous pouvez ensuite zoomer avec la molette ou les boutons +/−, déplacer l'image en la faisant glisser, double-cliquer pour agrandir, et fermer avec Échap."
+          },
+          {
+            "q": "Comment changer la langue ?",
+            "a": "Avec les boutons FR / EN en haut de la page."
+          }
+        ]
+      }
+    }
   },
   "Screens": {
     "title": "Parc de TV",
@@ -11,6 +156,8 @@
     "btnSave": "Enregistrer",
     "invalidIp": "Adresse IP ou nom d'hôte invalide",
     "sync": "Synchroniser les médias depuis un autre appareil",
+    "rename": "Renommer l'appareil",
+    "renameTitle": "Renommer l'appareil",
     "credentials": "Identifiants de l'appareil",
     "credentialsTitle": "Identifiants de l'appareil",
     "credentialsHint": "Authentification Basic activée dans les réglages d'Anthias. Le mot de passe est chiffré et n'est jamais réaffiché.",
@@ -48,6 +195,8 @@
     "syncNoSource": "Aucun autre appareil en ligne à copier",
     "syncError": "Échec de la synchronisation",
     "syncAuthFailed": "L'appareil refuse la connexion : identifiants manquants ou incorrects",
+    "renameSaved": "Appareil renommé",
+    "renameError": "Échec du renommage",
     "credentialsSaved": "Identifiants enregistrés",
     "credentialsRemoved": "Identifiants supprimés",
     "credentialsError": "Échec de l'enregistrement des identifiants",
