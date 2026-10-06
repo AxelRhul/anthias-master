@@ -181,6 +181,7 @@ If *Basic authentication* is enabled in the settings of an Anthias device, the a
 - The password is **encrypted** (AES-256-GCM) with `CREDENTIALS_ENCRYPTION_KEY` before being stored, and is never sent back to the browser: leaving the password empty keeps the stored one. Only the SUPER_ADMIN sees the username.
 - A device that answers but refuses the login is flagged with a warning icon for every user; sync reports it instead of failing silently.
 - Devices without a login of their own use the optional `ANTHIAS_USER` / `ANTHIAS_PASSWORD` fallback, if set.
+- A Raspberry Pi with Basic authentication takes over a second to answer (it checks the password on every request), so the online check waits up to 5 seconds per device (all devices are checked in parallel). An unreachable device can therefore delay the screen list by up to 5 seconds.
 
 Keep a backup of `CREDENTIALS_ENCRYPTION_KEY`: if it is lost or changed, the stored passwords can no longer be decrypted and have to be entered again.
 
