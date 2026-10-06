@@ -5,10 +5,10 @@ import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 import { signOut, useSession } from "next-auth/react";
 import { isAdminRole } from "@/lib/roles";
 
-export const Header = ({ loading, onRefresh }: any) => {
+export const Header = ({ loading, onRefresh }: { loading: boolean; onRefresh: () => void }) => {
     const t = useTranslations('Header');
     const { data: session } = useSession();
-    const isAdmin = isAdminRole((session?.user as any)?.role);
+    const isAdmin = isAdminRole(session?.user?.role);
 
     return (
         <header className="flex justify-between items-center border-b border-slate-800 pb-6">

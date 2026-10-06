@@ -6,7 +6,7 @@ import { isAdminRole } from "@/lib/roles";
 // Reads the role from the database (via the jwt callback), so a revoked user is rejected immediately.
 export async function requireUser() {
     const session = await getServerSession(authOptions);
-    const role = (session?.user as any)?.role;
+    const role = session?.user?.role;
     if (role === "USER" || isAdminRole(role)) return session;
     return null;
 }

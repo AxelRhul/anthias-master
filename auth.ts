@@ -9,7 +9,7 @@ import { clearFailures, isLimited, recordFailure } from "@/lib/rate-limit";
 let cachedDummyHash: string | undefined;
 const dummyHash = () => (cachedDummyHash ??= bcrypt.hashSync("anthias-master-dummy-password", 12));
 
-const GUID =/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const GUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const AZURE_TENANT = process.env.AZURE_AD_TENANT_ID?.trim();
 
 // Microsoft login is only enabled for ONE specific tenant (a GUID). "common" / "organizations" accept
@@ -23,17 +23,23 @@ if (!azureEnabled) {
 
 // The adapter's declared client type does not match Prisma 7's generated client, hence the cast
 const baseAdapter = PrismaAdapter(prisma as unknown as Parameters<typeof PrismaAdapter>[0]);
+type LinkedAccount = Parameters<NonNullable<typeof baseAdapter.linkAccount>>[0];
+const PROVIDER_TOKEN_FIELDS = new Set([
+    "access_token", "refresh_token", "id_token", "expires_at", "ext_expires_in", "token_type", "scope", "session_state",
+]);
 const adapter = {
     ...baseAdapter,
     // Sessions are JWT-only and the Microsoft tokens are never used afterwards: do not store them in the database
-    linkAccount: (account: any) => {
-        const { access_token, refresh_token, id_token, expires_at, ext_expires_in, token_type, scope, session_state, ...identity } = account;
+    linkAccount: (account: LinkedAccount) => {
+        const identity = Object.fromEntries(
+            Object.entries(account).filter(([key]) => !PROVIDER_TOKEN_FIELDS.has(key))
+        ) as LinkedAccount;
         return baseAdapter.linkAccount!(identity);
     },
 };
 
 export const authOptions: NextAuthOptions = {
-    adapter: adapter as any,
+    adapter: adapter as unknown as NextAuthOptions["adapter"],
     // Short lifetime bounds how long the role stored in the cookie (read by the proxy) can be stale
     session: { strategy: "jwt", maxAge: 12 * 60 * 60 },
     pages: { signIn: "/login" },
@@ -92,7 +98,7 @@ export const authOptions: NextAuthOptions = {
             if (account?.provider !== "azure-ad") return true;
 
             // The token must come from the configured tenant
-            const tid = (profile as any)?.tid;
+            const tid = (profile as { tid?: unknown } | undefined)?.tid;
             if (typeof tid !== "string" || tid.toLowerCase() !== AZURE_TENANT?.toLowerCase()) return false;
 
             // The SUPER_ADMIN is never linked to a Microsoft identity through its email address
@@ -126,8 +132,8 @@ export const authOptions: NextAuthOptions = {
         },
         async session({ session, token }) {
             if (session.user) {
-                (session.user as any).id = token.sub;
-                (session.user as any).role = token.role;
+                session.user.id = token.sub ?? "";
+                session.user.role = token.role ?? "PENDING";
             }
             return session;
         },

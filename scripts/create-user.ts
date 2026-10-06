@@ -17,10 +17,12 @@ const MAX_BYTES = 72; // bcrypt ignores everything after 72 bytes
 
 function askHidden(question: string): Promise<string> {
     return new Promise(resolve => {
-        const rl = readline.createInterface({ input: process.stdin, output: process.stdout, terminal: true });
+        // readline has no public way to hide typed characters: it writes through this internal method
+        const rl = readline.createInterface({ input: process.stdin, output: process.stdout, terminal: true }) as
+            readline.Interface & { _writeToOutput: (text: string) => void };
         let muted = false;
-        (rl as any)._writeToOutput = (text: string) => {
-            if (!muted) (rl as any).output.write(text);
+        rl._writeToOutput = (text: string) => {
+            if (!muted) process.stdout.write(text);
         };
         rl.question(question, answer => {
             rl.close();

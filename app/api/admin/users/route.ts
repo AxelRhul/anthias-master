@@ -29,7 +29,7 @@ export async function PATCH(req: Request) {
         return NextResponse.json({ error: "not_found" }, { status: 404 });
     }
 
-    const actor = session.user as any;
+    const actor = session.user;
     if (target.id === actor.id) {
         return NextResponse.json({ error: "cannot_change_own_role" }, { status: 400 });
     }
