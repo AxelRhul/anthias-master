@@ -15,6 +15,14 @@ export async function register() {
         console.warn(`[security] ${message}`);
     }
 
+    const { isEncryptionConfigured } = await import("@/lib/crypto");
+    if (!isEncryptionConfigured()) {
+        console.warn(
+            "[security] CREDENTIALS_ENCRYPTION_KEY is missing or is not 32 bytes of base64: Anthias device " +
+            "passwords cannot be saved or used. Generate one with: openssl rand -base64 32"
+        );
+    }
+
     const url = process.env.NEXTAUTH_URL ?? "";
     if (process.env.NODE_ENV === "production" && !url.startsWith("https://")) {
         console.warn("[security] NEXTAUTH_URL is not https://: session cookies will not be marked Secure.");
