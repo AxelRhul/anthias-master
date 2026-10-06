@@ -21,7 +21,8 @@ if (!azureEnabled) {
     console.warn("[auth] Microsoft login disabled: set AZURE_AD_CLIENT_ID, AZURE_AD_CLIENT_SECRET and AZURE_AD_TENANT_ID (tenant GUID).");
 }
 
-const baseAdapter = PrismaAdapter(prisma);
+// The adapter's declared client type does not match Prisma 7's generated client, hence the cast
+const baseAdapter = PrismaAdapter(prisma as unknown as Parameters<typeof PrismaAdapter>[0]);
 const adapter = {
     ...baseAdapter,
     // Sessions are JWT-only and the Microsoft tokens are never used afterwards: do not store them in the database
