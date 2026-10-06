@@ -1,15 +1,7 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/auth";
 import { prisma } from "@/lib/prisma";
-
-const VALID_ROLES = ["PENDING", "USER", "ADMIN"];
-
-async function requireAdmin() {
-    const session = await getServerSession(authOptions);
-    if ((session?.user as any)?.role !== "ADMIN") return null;
-    return session;
-}
+import { requireAdmin } from "@/lib/require-admin";
+import { ASSIGNABLE_ROLES, canModifyUser } from "@/lib/roles";
 
 export async function GET() {
     if (!(await requireAdmin())) {
@@ -28,12 +20,23 @@ export async function PATCH(req: Request) {
         return NextResponse.json({ error: "forbidden" }, { status: 403 });
     }
     const { id, role } = await req.json();
-    if (!id || !VALID_ROLES.includes(role)) {
+    if (!id || !(ASSIGNABLE_ROLES as string[]).includes(role)) {
         return NextResponse.json({ error: "invalid_params" }, { status: 400 });
     }
-    if (id === (session.user as any).id) {
+
+    const target = await prisma.user.findUnique({ where: { id }, select: { id: true, role: true } });
+    if (!target) {
+        return NextResponse.json({ error: "not_found" }, { status: 404 });
+    }
+
+    const actor = session.user as any;
+    if (target.id === actor.id) {
         return NextResponse.json({ error: "cannot_change_own_role" }, { status: 400 });
     }
+    if (!canModifyUser(actor.id, actor.role, target)) {
+        return NextResponse.json({ error: "forbidden_target" }, { status: 403 });
+    }
+
     const user = await prisma.user.update({
         where: { id },
         data: { role },

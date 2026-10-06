@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useSession } from 'next-auth/react';
+import { isAdminRole } from '@/lib/roles';
 import { Header } from '@/components/Header';
 import { ScreenManager } from '@/components/ScreenManager';
 import { BroadcastForm } from '@/components/BroadcastForm';
@@ -12,7 +13,7 @@ import { Save, X } from 'lucide-react';
 export default function MasterOps() {
   const t = useTranslations('modals');
   const { data: session } = useSession();
-  const isAdmin = (session?.user as any)?.role === 'ADMIN';
+  const isAdmin = isAdminRole((session?.user as any)?.role);
   const [screens, setScreens] = useState<any[]>([]);
   const [assets, setAssets] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);

@@ -10,15 +10,21 @@ if (!email || !password) {
 }
 
 async function main() {
+    const existing = await prisma.user.findFirst({ where: { role: "SUPER_ADMIN", NOT: { email } } });
+    if (existing) {
+        console.error(`❌ Un SUPER_ADMIN existe déjà (${existing.email}). Il ne peut y en avoir qu'un.`);
+        process.exit(1);
+    }
+
     const passwordHash = await bcrypt.hash(password, 12);
     const user = await prisma.user.upsert({
         where: { email },
-        update: { passwordHash, name: name ?? undefined, role: "ADMIN" },
+        update: { passwordHash, name: name ?? undefined, role: "SUPER_ADMIN" },
         create: {
             email,
             passwordHash,
             name: name ?? email.split("@")[0],
-            role: "ADMIN",
+            role: "SUPER_ADMIN",
         },
     });
     console.log(`✅ Utilisateur prêt : ${user.email} (${user.role})`);

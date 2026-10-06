@@ -3,11 +3,12 @@ import { Monitor, RefreshCcw, LogOut, Users } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 import { signOut, useSession } from "next-auth/react";
+import { isAdminRole } from "@/lib/roles";
 
 export const Header = ({ loading, onRefresh }: any) => {
     const t = useTranslations('Header');
     const { data: session } = useSession();
-    const isAdmin = (session?.user as any)?.role === "ADMIN";
+    const isAdmin = isAdminRole((session?.user as any)?.role);
 
     return (
         <header className="flex justify-between items-center border-b border-slate-800 pb-6">

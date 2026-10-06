@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
+import { isAdminRole } from "@/lib/roles";
 
 export async function middleware(req: NextRequest) {
     const { pathname } = req.nextUrl;
@@ -27,7 +28,7 @@ export async function middleware(req: NextRequest) {
     }
 
     // Routes admin réservées aux ADMIN
-    if (pathname.startsWith("/admin") && token.role !== "ADMIN") {
+    if (pathname.startsWith("/admin") && !isAdminRole(token.role as string)) {
         return NextResponse.redirect(new URL("/", req.url));
     }
 

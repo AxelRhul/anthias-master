@@ -1,8 +1,9 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/auth";
+import { isAdminRole } from "@/lib/roles";
 
 export async function requireAdmin() {
     const session = await getServerSession(authOptions);
-    if ((session?.user as any)?.role !== "ADMIN") return null;
+    if (!isAdminRole((session?.user as any)?.role)) return null;
     return session;
 }
