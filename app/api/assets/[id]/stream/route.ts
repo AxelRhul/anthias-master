@@ -15,7 +15,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     const screens = await prisma.screen.findMany({ orderBy: { id: 'asc' } });
     if (screens.length === 0) return NextResponse.json({ error: "no_screen" }, { status: 404 });
 
-    let data: any;
+    let data: { content?: string } | undefined;
     try {
         const res = await anthias.get(`http://${screens[0].ip.trim()}/api/v2/assets/${id}/content`, { timeout: 30000, maxContentLength: 150 * 1024 * 1024 });
         data = res.data;

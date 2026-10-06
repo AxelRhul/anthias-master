@@ -4,13 +4,15 @@ import FormData from 'form-data';
 import { prisma } from '@/lib/prisma';
 import { MIME_EXT, sniffMime } from '@/lib/mime';
 import { requireUser, unauthorized } from '@/lib/require-user';
+import { errorDetail } from '@/lib/errors';
+import type { Asset } from '@/lib/types';
 
 // A 100 MB file is ~134 MB once base64-encoded by Anthias; anything larger is refused instead of buffered
 const MAX_CONTENT_BYTES = 150 * 1024 * 1024;
 
 const toAnthiasDate = (d: string) => new Date(d).toISOString().split('.')[0] + 'Z';
 
-const listAssets = async (ip: string): Promise<any[]> => {
+const listAssets = async (ip: string): Promise<Asset[]> => {
     const res = await anthias.get(`http://${ip}/api/v2/assets`, { timeout: 5000 });
     return Array.isArray(res.data) ? res.data : [];
 };
@@ -26,7 +28,7 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
 
     const others = await prisma.screen.findMany({ where: { id: { not: numId } }, orderBy: { id: 'asc' } });
 
-    let source: { ip: string; assets: any[] } | null = null;
+    let source: { ip: string; assets: Asset[] } | null = null;
     for (const s of others) {
         try {
             source = { ip: s.ip.trim(), assets: await listAssets(s.ip.trim()) };
@@ -36,7 +38,7 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
     if (!source) return NextResponse.json({ error: "no_source" }, { status: 409 });
 
     const targetIp = target.ip.trim();
-    let existing: any[];
+    let existing: Asset[];
     try {
         existing = await listAssets(targetIp);
     } catch {
@@ -89,9 +91,9 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
             }, { headers: { 'Content-Type': 'application/json' }, timeout: 10000 });
 
             copied++;
-        } catch (err: any) {
+        } catch (err) {
             failed++;
-            console.error(`[sync] ${asset.name} -> ${targetIp}:`, err.response?.data || err.message);
+            console.error(`[sync] ${asset.name} -> ${targetIp}:`, errorDetail(err));
         }
     }
 

@@ -1,4 +1,5 @@
 import { anthias } from '@/lib/anthias';
+import { errorDetail } from '@/lib/errors';
 
 type Screen = { ip: string };
 type SourceAsset = { asset_id: string; name: string };
@@ -17,27 +18,27 @@ export async function deleteAssetsEverywhere(screens: Screen[], sourceAssets: So
         try {
             await anthias.delete(`${base(source)}/${asset.asset_id}`, { timeout: 10000 });
             deleted++;
-        } catch (err: any) {
+        } catch (err) {
             failed++;
-            console.error(`[delete] ${asset.name} on ${source.ip}:`, err.response?.data || err.message);
+            console.error(`[delete] ${asset.name} on ${source.ip}:`, errorDetail(err));
         }
     }
 
     for (const screen of others) {
         try {
             const res = await anthias.get(base(screen), { timeout: 5000 });
-            const matches: any[] = (Array.isArray(res.data) ? res.data : []).filter((a: any) => names.has(a.name));
-            for (const a of matches) {
+            const list: SourceAsset[] = Array.isArray(res.data) ? res.data : [];
+            for (const a of list.filter(item => names.has(item.name))) {
                 try {
                     await anthias.delete(`${base(screen)}/${a.asset_id}`, { timeout: 10000 });
-                } catch (err: any) {
+                } catch (err) {
                     failed++;
-                    console.error(`[delete] ${a.name} on ${screen.ip}:`, err.response?.data || err.message);
+                    console.error(`[delete] ${a.name} on ${screen.ip}:`, errorDetail(err));
                 }
             }
-        } catch (err: any) {
+        } catch (err) {
             failed++;
-            console.error(`[delete] cannot reach ${screen.ip}:`, err.message);
+            console.error(`[delete] cannot reach ${screen.ip}:`, errorDetail(err));
         }
     }
 

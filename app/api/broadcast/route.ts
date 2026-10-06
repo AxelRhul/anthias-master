@@ -4,13 +4,14 @@ import { anthias } from '@/lib/anthias';
 import FormData from 'form-data';
 import { requireUser, unauthorized } from '@/lib/require-user';
 import { MIME_EXT, sniffMime } from '@/lib/mime';
+import { errorDetail } from '@/lib/errors';
 
 const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100 MB
 const MAX_FORM_OVERHEAD = 1024 * 1024; // multipart boundaries and the other form fields
 
-const formatAnthiasDate = (d: any) => {
+const formatAnthiasDate = (d: FormDataEntryValue | null) => {
     try {
-        const date = d ? new Date(d) : new Date();
+        const date = typeof d === 'string' && d ? new Date(d) : new Date();
         return date.toISOString().split('.')[0] + 'Z';
     } catch {
         return new Date().toISOString().split('.')[0] + 'Z';
@@ -29,8 +30,8 @@ export async function POST(req: Request) {
 
     try {
         const data = await req.formData();
-        const file = data.get('file') as File;
-        if (!file) return NextResponse.json({ error: "no_file" }, { status: 400 });
+        const file = data.get('file');
+        if (!(file instanceof File)) return NextResponse.json({ error: "no_file" }, { status: 400 });
 
         if (file.size > MAX_FILE_SIZE) {
             return NextResponse.json({ error: "file_too_large" }, { status: 413 });
@@ -42,13 +43,13 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "invalid_file_type" }, { status: 415 });
         }
 
-        const rawName = data.get('name') as string;
-        const name = (rawName?.trim().slice(0, 255)) || file.name.slice(0, 255);
+        const rawName = data.get('name');
+        const name = (typeof rawName === 'string' ? rawName.trim().slice(0, 255) : '') || file.name.slice(0, 255);
         const isVideo = mimeType.startsWith('video/');
         const duration = isVideo ? 0 : (Math.floor(Number(data.get('duration'))) || 10);
         const play_order = Math.floor(Number(data.get('play_order'))) || 0;
-        const start_date = data.get('start_date') as string;
-        const end_date = data.get('end_date') as string;
+        const start_date = data.get('start_date');
+        const end_date = data.get('end_date');
 
         // Safe characters only, and the extension always matches the detected type
         const baseName = file.name.replace(/\.[^.]*$/, '').replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 150) || 'asset';
@@ -96,8 +97,8 @@ export async function POST(req: Request) {
                 });
 
                 results.push({ ip: screen.ip, status: 'OK' });
-            } catch (err: any) {
-                console.error(`[ERR] ${screen.ip}:`, err.response?.data || err.message);
+            } catch (err) {
+                console.error(`[ERR] ${screen.ip}:`, errorDetail(err));
                 results.push({ ip: screen.ip, status: 'ERROR' });
             }
         }

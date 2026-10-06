@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { isValidHost } from '@/lib/validate';
 import { isSafeScreenHost } from '@/lib/ssrf';
+import { errorCode } from '@/lib/errors';
 import { requireAdmin } from '@/lib/require-admin';
 import { requireUser, unauthorized } from '@/lib/require-user';
 import { anthias } from '@/lib/anthias';
@@ -50,8 +51,8 @@ export async function POST(req: Request) {
 
         const screen = await prisma.screen.create({ data: { ip, label } });
         return NextResponse.json(screen, { status: 201 });
-    } catch (err: any) {
-        if (err?.code === 'P2002') {
+    } catch (err) {
+        if (errorCode(err) === 'P2002') {
             return NextResponse.json({ error: "ip_already_exists" }, { status: 409 });
         }
         return NextResponse.json({ error: "db_error" }, { status: 500 });

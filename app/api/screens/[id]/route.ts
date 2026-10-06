@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/require-admin';
+import { errorCode } from '@/lib/errors';
 
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
     if (!(await requireAdmin())) {
@@ -15,8 +16,8 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
     try {
         await prisma.screen.delete({ where: { id: numId } });
         return NextResponse.json({ success: true });
-    } catch (err: any) {
-        if (err?.code === 'P2025') {
+    } catch (err) {
+        if (errorCode(err) === 'P2025') {
             return NextResponse.json({ error: "not_found" }, { status: 404 });
         }
         return NextResponse.json({ error: "db_error" }, { status: 500 });
