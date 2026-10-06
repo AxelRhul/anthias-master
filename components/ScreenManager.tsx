@@ -2,16 +2,7 @@
 import { useRef, useState } from 'react';
 import { Wifi, WifiOff, Trash2, RefreshCw } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-
-const IPV4_REGEX = /^(\d{1,3}\.){3}\d{1,3}$/;
-const HOSTNAME_REGEX = /^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
-
-function isValidHost(host: string): boolean {
-    const h = host.trim();
-    if (!h || h.length > 253) return false;
-    if (IPV4_REGEX.test(h)) return h.split('.').every(p => parseInt(p, 10) <= 255);
-    return HOSTNAME_REGEX.test(h);
-}
+import { isValidHost } from '@/lib/validate';
 
 export const ScreenManager = ({ screens, onAdd, onDelete, onSync, syncingId, isAdmin }: any) => {
     const t = useTranslations('Screens');

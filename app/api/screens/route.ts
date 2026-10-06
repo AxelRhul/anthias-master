@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { isValidHost } from '@/lib/validate';
+import { isSafeScreenHost } from '@/lib/ssrf';
 import { requireAdmin } from '@/lib/require-admin';
 import { requireUser, unauthorized } from '@/lib/require-user';
 import { anthias } from '@/lib/anthias';
@@ -39,6 +40,9 @@ export async function POST(req: Request) {
         }
         if (!isValidHost(ip)) {
             return NextResponse.json({ error: "invalid_ip" }, { status: 400 });
+        }
+        if (!(await isSafeScreenHost(ip))) {
+            return NextResponse.json({ error: "forbidden_host" }, { status: 400 });
         }
         if (label.length > 100) {
             return NextResponse.json({ error: "label_too_long" }, { status: 400 });
