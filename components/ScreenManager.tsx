@@ -3,8 +3,18 @@ import { useRef, useState } from 'react';
 import { Wifi, WifiOff, Trash2, RefreshCw } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { isValidHost } from '@/lib/validate';
+import type { Screen } from '@/lib/types';
 
-export const ScreenManager = ({ screens, onAdd, onDelete, onSync, syncingId, isAdmin }: any) => {
+type ScreenManagerProps = {
+    screens: Screen[];
+    onAdd: (ip: string, label: string) => Promise<void>;
+    onDelete: (id: number) => void;
+    onSync: (id: number) => void;
+    syncingId: number | null;
+    isAdmin: boolean;
+};
+
+export const ScreenManager = ({ screens, onAdd, onDelete, onSync, syncingId, isAdmin }: ScreenManagerProps) => {
     const t = useTranslations('Screens');
     const ipRef = useRef<HTMLInputElement>(null);
     const labelRef = useRef<HTMLInputElement>(null);
@@ -30,7 +40,7 @@ export const ScreenManager = ({ screens, onAdd, onDelete, onSync, syncingId, isA
             <section className="bg-slate-900 border border-slate-800 rounded-3xl p-6">
                 <h2 className="text-xl font-bold mb-4 flex items-center gap-2 text-slate-400"><Wifi size={20} /> {t('title')}</h2>
                 <div className="space-y-3">
-                    {screens.map((s: any) => (
+                    {screens.map(s => (
                         <div key={s.id} className="flex items-center justify-between p-4 bg-slate-950 rounded-2xl border border-slate-800">
                             <div><p className="font-bold">{s.label}</p><p className="text-xs font-mono text-slate-500">{s.ip}</p></div>
                             <div className="flex items-center gap-3">

@@ -1,5 +1,14 @@
-import { Eye, Edit3, Image, Film, Trash2 } from 'lucide-react';
+import { Eye, Edit3, Image as ImageIcon, Film, Trash2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import type { Asset } from '@/lib/types';
+
+type AssetLibraryProps = {
+  assets: Asset[];
+  onView: (id: string, name: string) => void;
+  onEdit: (asset: Asset) => void;
+  onDelete: (id: string, name: string) => void;
+  onDeleteDisabled: () => void;
+};
 
 const decodeHtml = (s: string) => {
   if (typeof document === 'undefined') return s;
@@ -10,15 +19,15 @@ const decodeHtml = (s: string) => {
 
 const VIDEO_EXTS = new Set(['mp4', 'webm', 'mov', 'avi', 'mkv', 'ogv', 'm4v']);
 
-const isVideo = (asset: any) => {
+const isVideo = (asset: Asset) => {
   if (asset.mimetype?.startsWith('video')) return true;
   const ext = asset.uri?.split('.').pop()?.toLowerCase();
   return ext ? VIDEO_EXTS.has(ext) : false;
 };
 
-export const AssetLibrary = ({ assets, onView, onEdit, onDelete, onDeleteDisabled }: any) => {
+export const AssetLibrary = ({ assets, onView, onEdit, onDelete, onDeleteDisabled }: AssetLibraryProps) => {
   const t = useTranslations('Library');
-  const disabledCount = assets.filter((a: any) => !a.is_enabled).length;
+  const disabledCount = assets.filter(a => !a.is_enabled).length;
   return (
       <section className="bg-slate-900 border border-slate-800 rounded-3xl p-8">
         <div className="flex justify-between items-center mb-6">
@@ -38,10 +47,10 @@ export const AssetLibrary = ({ assets, onView, onEdit, onDelete, onDeleteDisable
           </tr>
           </thead>
           <tbody className="divide-y divide-slate-800">
-          {assets.map((asset: any) => (
+          {assets.map(asset => (
               <tr key={asset.asset_id} className="hover:bg-slate-800/30 transition">
                 <td className="py-4 font-medium flex items-center gap-2">
-                  {isVideo(asset) ? <Film size={14} className="text-purple-400 shrink-0" /> : <Image size={14} className="text-blue-400 shrink-0" />}
+                  {isVideo(asset) ? <Film size={14} className="text-purple-400 shrink-0" /> : <ImageIcon size={14} className="text-blue-400 shrink-0" />}
                   {decodeHtml(asset.name ?? '')}
                 </td>
                 <td className="py-4">
