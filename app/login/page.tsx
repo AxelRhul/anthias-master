@@ -1,13 +1,18 @@
 "use client";
-import { useState } from "react";
-import { signIn } from "next-auth/react";
+import { useEffect, useState } from "react";
+import { signIn, getProviders } from "next-auth/react";
 import { Monitor } from "lucide-react";
 
 export default function LoginPage() {
+    const [hasAzure, setHasAzure] = useState(false);
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        getProviders().then(p => setHasAzure(Boolean(p?.["azure-ad"]))).catch(() => setHasAzure(false));
+    }, []);
 
     const handleCredentials = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -29,6 +34,7 @@ export default function LoginPage() {
                 </div>
 
                 <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 space-y-6">
+                    {hasAzure && <>
                     <button
                         onClick={() => signIn("azure-ad", { callbackUrl: "/" })}
                         className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-3 transition active:scale-95"
@@ -47,6 +53,7 @@ export default function LoginPage() {
                         <span className="text-slate-600 text-sm">ou</span>
                         <div className="flex-1 h-px bg-slate-800" />
                     </div>
+                    </>}
 
                     <form onSubmit={handleCredentials} className="space-y-4">
                         {error && (
