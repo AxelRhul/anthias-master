@@ -5,6 +5,7 @@ import { Toast } from '@/components/Toast';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { ScreenManager } from '@/features/screens/components/ScreenManager';
 import { ScreenCredentialsDialog } from '@/features/screens/components/ScreenCredentialsDialog';
+import { ScreenRenameDialog } from '@/features/screens/components/ScreenRenameDialog';
 import { BroadcastForm } from '@/features/assets/components/BroadcastForm';
 import { AssetLibrary } from '@/features/assets/components/AssetLibrary';
 import { AssetPreview } from '@/features/assets/components/AssetPreview';
@@ -31,6 +32,7 @@ export default function MasterOps() {
                 isAdmin={d.isAdmin}
                 isSuperAdmin={d.isSuperAdmin}
                 onEditCredentials={d.openCredentials}
+                onRename={d.openRename}
               />
             </div>
 
@@ -48,6 +50,14 @@ export default function MasterOps() {
         </div>
 
         {d.toast && <Toast message={d.toast} onClose={d.dismissToast} />}
+
+        {d.renaming && (
+          <ScreenRenameDialog
+            screen={d.renaming}
+            onSave={d.saveRename}
+            onClose={d.closeRename}
+          />
+        )}
 
         {d.credentialsFor && (
           <ScreenCredentialsDialog
