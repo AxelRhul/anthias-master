@@ -5,7 +5,7 @@ import { isAdminRole } from "@/lib/roles";
 
 const MUTATING = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
     const { pathname } = req.nextUrl;
     const isApi = pathname.startsWith("/api");
 

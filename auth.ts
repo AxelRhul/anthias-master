@@ -34,7 +34,7 @@ const adapter = {
 
 export const authOptions: NextAuthOptions = {
     adapter: adapter as any,
-    // Short lifetime bounds how long the role stored in the cookie (read by the middleware) can be stale
+    // Short lifetime bounds how long the role stored in the cookie (read by the proxy) can be stale
     session: { strategy: "jwt", maxAge: 12 * 60 * 60 },
     pages: { signIn: "/login" },
     providers: [

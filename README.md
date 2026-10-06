@@ -160,7 +160,7 @@ The user created this way is the **`SUPER_ADMIN`**. There can only be one: the s
 
 ## Security
 
-- **Every API route checks the session** (approved role, read from the database) — the middleware is not the only barrier. State-changing requests coming from another site are refused.
+- **Every API route checks the session** (approved role, read from the database) — the proxy is not the only barrier. State-changing requests coming from another site are refused.
 - **Uploads are validated by content**: only JPEG, PNG, GIF, WebP, MP4, WebM, MOV and Ogg are accepted (SVG and HTML are rejected), whatever type the browser announces. Media are served with `nosniff` and a sandboxing CSP; unknown content is only offered as a download.
 - **Screen addresses** are validated: loopback, link-local (cloud metadata) and ambiguous spellings (`0177.0.0.1`, `2130706433`) are refused, hostnames are resolved and checked. Private ranges (192.168.x.x…) stay allowed.
 - **Security headers** (CSP, `X-Frame-Options`, `nosniff`, `Referrer-Policy`) are set on every response. HSTS is deliberately not enabled because the certificate is self-signed.
@@ -228,7 +228,7 @@ Nobody can change their own role, and nobody can modify the `SUPER_ADMIN`.
 │   ├── create-user.ts          # CLI to create the SUPER_ADMIN
 │   └── purge-provider-tokens.ts # Removes Microsoft tokens stored by older versions
 ├── auth.ts                     # NextAuth config (providers + callbacks)
-├── middleware.ts               # Auth + role guard for all routes
+├── proxy.ts                    # Auth + role guard for all routes (Next.js proxy, formerly middleware)
 ├── messages/
 │   ├── fr.json                 # French translations
 │   └── en.json                 # English translations
