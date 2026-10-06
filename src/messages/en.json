@@ -96,7 +96,7 @@
         "steps": [
           "Green Wi-Fi icon: the screen answers. Red crossed icon: the screen is unreachable (powered off, off the network...).",
           "Orange shield icon: the screen answers but refuses the application's connection. Tell the super administrator, who can enter its login.",
-          "The sync icon (two arrows) copies onto this screen the media it does not have yet, from another online screen. It deletes nothing, and media are compared by name.",
+          "The sync icon (two arrows) copies onto this screen the media it does not have yet, from another online screen. It deletes nothing, only copies media sent from the application (not the ones added directly on a screen), and media are compared by name.",
           "A message shows the result: number of media copied, failures, or \"device already up to date\".",
           "Adding, removing and setting the login of screens is handled by administrators and is not covered here."
         ],
@@ -135,6 +135,10 @@
           {
             "q": "\"Too many attempts\" appears when signing in.",
             "a": "Too many wrong passwords were entered. Wait 15 minutes before trying again."
+          },
+          {
+            "q": "I added a media directly on a screen: will it be copied to the others?",
+            "a": "No. A media added from a screen's own interface stays on that screen: the sync only copies media sent from Anthias Master."
           },
           {
             "q": "The screenshots are too small to read.",
