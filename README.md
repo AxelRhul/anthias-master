@@ -12,6 +12,7 @@ A **Next.js** web application for centrally managing an [Anthias](https://github
 - **Authentication** — login via Microsoft (Entra ID / Azure AD) or email + password
 - **Role-based access** — four roles: `SUPER_ADMIN`, `ADMIN`, `USER`, `PENDING`; new users wait for approval
 - **User management** — admin panel to approve new users and switch them between `USER` and `ADMIN`
+- **Built-in guide** — a `/guide` page (button next to Refresh) explaining how to broadcast, manage media and use the dashboard, in French and English
 - **Multilingual** — French and English UI, switchable without a page reload (via `NEXT_LOCALE` cookie)
 
 ## Tech Stack
@@ -232,7 +233,8 @@ The code lives in `src/` and is organized **by feature**: each folder in `src/fe
 │   │   ├── screens/                # ScreenManager, host validation, SSRF guard
 │   │   ├── assets/                 # AssetLibrary, BroadcastForm, preview/edit dialogs, mime detection, deletion
 │   │   ├── users/                  # UserManagement UI
-│   │   └── dashboard/              # use-dashboard hook (state and actions of the main page)
+│   │   ├── dashboard/              # use-dashboard hook (state and actions of the main page)
+│   │   └── guide/                  # Section structure and screenshot component of the /guide page
 │   ├── components/                 # Shared UI: Header, Toast, ConfirmDialog, LocaleSwitcher, Providers
 │   ├── lib/                        # Shared server helpers: prisma, anthias client, errors
 │   ├── i18n/  messages/            # next-intl request config and fr/en translations
@@ -250,6 +252,26 @@ The code lives in `src/` and is organized **by feature**: each folder in `src/fe
 ```
 
 The `@/` import alias points to `src/` (e.g. `@/features/auth/roles`).
+
+## User Guide
+
+The `/guide` page is built from the texts in `src/messages/fr.json` and `en.json` (namespace `Guide`) and the section list in `src/features/guide/sections.ts`. To add a section, add it to `sections.ts` and write its `title`, `intro`, `steps` (and optional `tip`, `images`) in both message files.
+
+Screenshots are plain files in `public/images/guide/` (PNG, about 1400 px wide, French interface, no real IP addresses or e-mails). A screenshot that does not exist yet is simply not displayed (in development, a dashed placeholder shows the expected file name).
+
+| File | What it shows |
+|------|---------------|
+| `dashboard.png` | The whole dashboard: fleet on the left, broadcast form and library on the right |
+| `login.png` | The login page |
+| `pending.png` | The "access pending" page |
+| `broadcast-form.png` | Broadcast form with an image selected (preview visible) |
+| `broadcast-video.png` | Broadcast form with a video selected (Duration locked) |
+| `library.png` | Library with active and OFF media (type icons, status, actions, "Delete OFF" button) |
+| `asset-preview.png` | The full-size preview of a media |
+| `asset-edit.png` | The "edit media" window |
+| `delete-confirm.png` | The deletion confirmation window |
+| `device-status.png` | Fleet list with the green, red and orange icons and the sync icon |
+| `admin-users.png` | The user management page (administrators) |
 
 ## Internal API
 
