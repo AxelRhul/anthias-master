@@ -4,6 +4,8 @@ import { deleteAssetsEverywhere } from '@/features/assets/delete-everywhere';
 import { requireUser, unauthorized } from '@/features/auth/require-user';
 import { anthiasFor } from '@/lib/anthias';
 import type { Asset } from '@/features/assets/types';
+import { adoptBaselineIfEmpty } from '@/features/assets/managed';
+import { errorDetail } from '@/lib/errors';
 
 export async function GET() {
     if (!(await requireUser())) return unauthorized();
@@ -12,6 +14,11 @@ export async function GET() {
 
     try {
         const res = await anthiasFor(screens[0]).get('/assets', { timeout: 4000 });
+
+        // First load after the upgrade: nothing is tracked yet, so the media already in the library are adopted
+        if (Array.isArray(res.data)) {
+            await adoptBaselineIfEmpty(res.data).catch(err => console.error('[assets] cannot adopt the library:', errorDetail(err)));
+        }
         return NextResponse.json(res.data);
     } catch {
         return NextResponse.json({ error: "Impossible de lister" }, { status: 500 });
