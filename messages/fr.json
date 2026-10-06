@@ -30,7 +30,8 @@
     "colStatus": "Statut",
     "colActions": "Actions",
     "statusActive": "ACTIF",
-    "statusOff": "OFF"
+    "statusOff": "OFF",
+    "deleteOff": "Supprimer les OFF ({count})"
   },
   "modals": {
     "broadcastDone": "Diffusion terminée !",
@@ -38,6 +39,13 @@
     "syncUpToDate": "Appareil déjà à jour",
     "syncNoSource": "Aucun autre appareil en ligne à copier",
     "syncError": "Échec de la synchronisation",
+    "confirmDeleteTitle": "Supprimer définitivement",
+    "confirmDeleteOne": "Supprimer « {name} » de tous les appareils ? Cette action est irréversible.",
+    "confirmDeleteOff": "Supprimer les {count} asset(s) désactivé(s) de tous les appareils ? Cette action est irréversible.",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "deleteDone": "{count} asset(s) supprimé(s), {failed} échec(s)",
+    "deleteError": "Échec de la suppression",
     "closeHint": "Cliquez n'importe où pour fermer",
     "editTitle": "Modifier l'asset",
     "name": "Nom",

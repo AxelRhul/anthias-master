@@ -1,4 +1,4 @@
-import { Eye, Edit3, Image, Film } from 'lucide-react';
+import { Eye, Edit3, Image, Film, Trash2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 const decodeHtml = (s: string) => {
@@ -16,11 +16,19 @@ const isVideo = (asset: any) => {
   return ext ? VIDEO_EXTS.has(ext) : false;
 };
 
-export const AssetLibrary = ({ assets, onView, onEdit }: any) => {
+export const AssetLibrary = ({ assets, onView, onEdit, onDelete, onDeleteDisabled }: any) => {
   const t = useTranslations('Library');
+  const disabledCount = assets.filter((a: any) => !a.is_enabled).length;
   return (
       <section className="bg-slate-900 border border-slate-800 rounded-3xl p-8">
-        <h2 className="text-2xl font-bold mb-6 text-blue-400">{t('title')}</h2>
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold text-blue-400">{t('title')}</h2>
+          {disabledCount > 0 && (
+              <button onClick={onDeleteDisabled} className="px-4 py-2 text-xs font-bold bg-rose-600/20 hover:bg-rose-600/40 text-rose-400 rounded-xl transition flex items-center gap-2">
+                <Trash2 size={14} /> {t('deleteOff', { count: disabledCount })}
+              </button>
+          )}
+        </div>
         <table className="w-full text-left">
           <thead>
           <tr className="text-slate-500 text-xs uppercase border-b border-slate-800">
@@ -44,6 +52,7 @@ export const AssetLibrary = ({ assets, onView, onEdit }: any) => {
                 <td className="py-4 flex gap-2">
                   <button onClick={() => onView(asset.asset_id, decodeHtml(asset.name ?? ''))} className="p-2 text-blue-400"><Eye size={18} /></button>
                   <button onClick={() => onEdit(asset)} className="p-2 text-amber-400"><Edit3 size={18} /></button>
+                  <button onClick={() => onDelete(asset.asset_id, decodeHtml(asset.name ?? ''))} className="p-2 text-rose-400"><Trash2 size={18} /></button>
                 </td>
               </tr>
           ))}

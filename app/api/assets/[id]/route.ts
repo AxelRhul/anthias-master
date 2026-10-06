@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { isValidAssetId } from '@/lib/validate';
+import { deleteAssetsEverywhere } from '@/lib/anthias-delete';
 import axios from 'axios';
 
 const formatAnthiasDate = (d: string) => {
@@ -10,6 +11,27 @@ const formatAnthiasDate = (d: string) => {
         return new Date().toISOString().split('.')[0] + 'Z';
     }
 };
+
+export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
+    if (!isValidAssetId(id)) {
+        return NextResponse.json({ error: "invalid_id" }, { status: 400 });
+    }
+
+    const screens = await prisma.screen.findMany({ orderBy: { id: 'asc' } });
+    if (screens.length === 0) return NextResponse.json({ error: "no_screen" }, { status: 404 });
+
+    let name: string;
+    try {
+        const res = await axios.get(`http://${screens[0].ip.trim()}/api/v2/assets/${id}`, { timeout: 5000 });
+        name = res.data.name;
+    } catch {
+        return NextResponse.json({ error: "not_found" }, { status: 404 });
+    }
+
+    const result = await deleteAssetsEverywhere(screens, [{ asset_id: id, name }]);
+    return NextResponse.json(result);
+}
 
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;

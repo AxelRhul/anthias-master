@@ -19,6 +19,7 @@ export default function MasterOps() {
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [syncingId, setSyncingId] = useState<number | null>(null);
+  const [confirm, setConfirm] = useState<{ kind: 'one'; id: string; name: string } | { kind: 'off'; count: number } | null>(null);
   const [preview, setPreview] = useState<any>(null);
   const [editingAsset, setEditingAsset] = useState<any>(null);
 
@@ -109,6 +110,26 @@ export default function MasterOps() {
     setPreview(null);
   };
 
+  const askDeleteAsset = (id: string, name: string) => setConfirm({ kind: 'one', id, name });
+  const askDeleteDisabled = () => setConfirm({ kind: 'off', count: assets.filter(a => !a.is_enabled).length });
+
+  const runDelete = async () => {
+    if (!confirm) return;
+    const target = confirm;
+    setConfirm(null);
+    setLoading(true);
+    try {
+      const res = await fetch(target.kind === 'one' ? `/api/assets/${target.id}` : '/api/assets', { method: 'DELETE' });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) setToast(t('deleteDone', { count: data.deleted ?? 0, failed: data.failed ?? 0 }));
+      else setToast(t('deleteError'));
+    } catch {
+      setToast(t('deleteError'));
+    }
+    setLoading(false);
+    loadAll();
+  };
+
   const saveChanges = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -134,12 +155,27 @@ export default function MasterOps() {
 
             <div className="col-span-12 lg:col-span-8 space-y-8">
               <BroadcastForm onSubmit={handleBroadcast} loading={loading} />
-              <AssetLibrary assets={assets} onView={openViewer} onEdit={setEditingAsset} />
+              <AssetLibrary assets={assets} onView={openViewer} onEdit={setEditingAsset} onDelete={askDeleteAsset} onDeleteDisabled={askDeleteDisabled} />
             </div>
           </div>
         </div>
 
         {toast && <Toast message={toast} onClose={() => setToast(null)} />}
+
+        {confirm && (
+            <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-6" onClick={() => setConfirm(null)}>
+              <div className="bg-slate-900 border border-slate-800 p-8 rounded-3xl w-full max-w-md space-y-6 shadow-2xl" onClick={e => e.stopPropagation()}>
+                <h2 className="text-xl font-bold text-rose-400">{t('confirmDeleteTitle')}</h2>
+                <p className="text-slate-300">
+                  {confirm.kind === 'one' ? t('confirmDeleteOne', { name: confirm.name }) : t('confirmDeleteOff', { count: confirm.count })}
+                </p>
+                <div className="flex gap-3">
+                  <button onClick={() => setConfirm(null)} className="flex-1 bg-slate-800 hover:bg-slate-700 py-3 rounded-xl font-bold transition">{t('cancel')}</button>
+                  <button onClick={runDelete} className="flex-1 bg-rose-600 hover:bg-rose-500 py-3 rounded-xl font-black transition">{t('delete')}</button>
+                </div>
+              </div>
+            </div>
+        )}
 
         {preview && (
             <div className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-12" onClick={closePreview}>

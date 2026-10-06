@@ -30,7 +30,8 @@
     "colStatus": "Status",
     "colActions": "Actions",
     "statusActive": "ACTIVE",
-    "statusOff": "OFF"
+    "statusOff": "OFF",
+    "deleteOff": "Delete OFF ({count})"
   },
   "modals": {
     "broadcastDone": "Broadcast complete!",
@@ -38,6 +39,13 @@
     "syncUpToDate": "Device already up to date",
     "syncNoSource": "No other online device to copy from",
     "syncError": "Sync failed",
+    "confirmDeleteTitle": "Delete permanently",
+    "confirmDeleteOne": "Delete \"{name}\" from all devices? This cannot be undone.",
+    "confirmDeleteOff": "Delete the {count} disabled asset(s) from all devices? This cannot be undone.",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "deleteDone": "{count} asset(s) deleted, {failed} failed",
+    "deleteError": "Delete failed",
     "closeHint": "Click anywhere to close",
     "editTitle": "Edit asset",
     "name": "Name",
