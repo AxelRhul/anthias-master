@@ -66,7 +66,7 @@ Starts two containers:
 - **anthias-nginx** — Nginx reverse proxy, exposes **HTTPS on port 3000**
 
 The SQLite database is persisted in a named Docker volume (`sqlite_data` → `/app/data/prod.db`).  
-Prisma migrations run automatically on container startup via `docker-entrypoint.sh`.  
+Prisma migrations run automatically on container startup via `docker/entrypoint.sh`.  
 A self-signed TLS certificate is generated automatically on first start and stored in the `nginx_certs` volume. Set `TLS_HOST` in `.env` to the IP or hostname users type in the browser (it is written into the certificate's `subjectAltName`; changing it regenerates the certificate on the next start).
 
 ```
@@ -199,45 +199,39 @@ Nobody can change their own role, and nobody can modify the `SUPER_ADMIN`.
 
 ## Project Structure
 
+The code lives in `src/` and is organized **by feature**: each folder in `src/features/` groups the UI, logic and types of one subject. `src/app/` only contains routing (pages, layouts, API route handlers).
+
 ```
-├── app/
-│   ├── layout.tsx              # Root layout (NextIntl + SessionProvider)
-│   ├── page.tsx                # Main dashboard
-│   ├── login/                  # Login page (Microsoft + credentials)
-│   ├── pending/                # Waiting-for-approval page
-│   ├── admin/users/            # User management (ADMIN only)
-│   └── api/
-│       ├── auth/[...nextauth]/ # NextAuth handler
-│       ├── screens/            # Screen CRUD (SQLite)
-│       ├── assets/[id]/        # Read / update a single Anthias asset
-│       ├── assets/             # Aggregated asset list across all screens
-│       ├── broadcast/          # Upload + deploy to all screens
-│       └── admin/users/        # User role management API
-├── components/
-│   ├── Header.tsx              # App header + admin link + sign-out
-│   ├── Providers.tsx           # SessionProvider wrapper
-│   ├── LocaleSwitcher.tsx      # FR/EN toggle (NEXT_LOCALE cookie)
-│   ├── ScreenManager.tsx       # Screen list and registration
-│   ├── BroadcastForm.tsx       # Broadcast form
-│   ├── AssetLibrary.tsx        # Asset table
-│   └── Toast.tsx               # In-app notification
-├── lib/
-│   ├── prisma.ts               # Prisma client (BetterSqlite3 adapter)
-│   └── validate.ts             # IP/hostname and asset ID validators
-├── scripts/
-│   ├── create-user.ts          # CLI to create the SUPER_ADMIN
-│   └── purge-provider-tokens.ts # Removes Microsoft tokens stored by older versions
-├── auth.ts                     # NextAuth config (providers + callbacks)
-├── proxy.ts                    # Auth + role guard for all routes (Next.js proxy, formerly middleware)
-├── messages/
-│   ├── fr.json                 # French translations
-│   └── en.json                 # English translations
-├── prisma/
-│   └── schema.prisma           # Screen + auth models
-├── Dockerfile                  # Multi-stage build on Node 24
-├── compose.yml                 # nextjs-standalone service + SQLite volume
-└── docker-entrypoint.sh        # migrate deploy → node server.js
+├── src/
+│   ├── app/                        # Routing only
+│   │   ├── layout.tsx, globals.css
+│   │   ├── page.tsx                # Dashboard (renders useDashboard + dialogs)
+│   │   ├── login/  pending/        # Login and waiting-for-approval pages
+│   │   ├── admin/users/            # User management page (ADMIN only)
+│   │   └── api/                    # Route handlers (see "Internal API")
+│   ├── features/
+│   │   ├── auth/                   # auth-options, require-user/admin, roles, rate-limit
+│   │   ├── screens/                # ScreenManager, host validation, SSRF guard
+│   │   ├── assets/                 # AssetLibrary, BroadcastForm, preview/edit dialogs, mime detection, deletion
+│   │   ├── users/                  # UserManagement UI
+│   │   └── dashboard/              # use-dashboard hook (state and actions of the main page)
+│   ├── components/                 # Shared UI: Header, Toast, ConfirmDialog, LocaleSwitcher, Providers
+│   ├── lib/                        # Shared server helpers: prisma, anthias client, errors
+│   ├── i18n/  messages/            # next-intl request config and fr/en translations
+│   ├── types/                      # NextAuth type augmentation
+│   ├── proxy.ts                    # Auth + role guard for all routes (Next.js proxy, formerly middleware)
+│   └── instrumentation.ts          # Startup checks (NEXTAUTH_SECRET)
+├── prisma/                         # schema.prisma + migrations
+├── scripts/                        # create-user.ts (SUPER_ADMIN), purge-provider-tokens.ts
+├── docker/
+│   ├── entrypoint.sh               # migrate deploy → node server.js
+│   └── nginx/                      # HTTPS reverse proxy (Dockerfile, entrypoint, nginx.conf)
+├── Dockerfile                      # Multi-stage build on Node 24
+├── compose.yml                     # nextjs-standalone + nginx services, SQLite and certificate volumes
+└── next.config.ts, tsconfig.json, eslint.config.mjs, prisma.config.ts
 ```
+
+The `@/` import alias points to `src/` (e.g. `@/features/auth/roles`).
 
 ## Internal API
 
@@ -261,6 +255,6 @@ Nobody can change their own role, and nobody can modify the `SUPER_ADMIN`.
 
 ## Adding a Language
 
-1. Create `messages/<code>.json` with all keys from an existing file
-2. Add the locale code to `i18n/routing.ts` → `locales` array
-3. Add the locale code to `components/LocaleSwitcher.tsx` → `locales` array
+1. Create `src/messages/<code>.json` with all keys from an existing file
+2. Add the locale code to `src/i18n/request.ts` → `locales` array
+3. Add the locale code to `src/components/LocaleSwitcher.tsx` → `locales` array
