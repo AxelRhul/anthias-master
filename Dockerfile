@@ -94,7 +94,7 @@ COPY --from=builder --chown=node:node /app/node_modules ./node_modules
 COPY --from=builder --chown=node:node /app/scripts ./scripts
 COPY --from=builder --chown=node:node /app/lib ./lib
 
-COPY --chown=node:node docker-entrypoint.sh ./
+COPY --chown=node:node docker/entrypoint.sh ./docker-entrypoint.sh
 RUN chmod +x docker-entrypoint.sh && sed -i 's/\r//' docker-entrypoint.sh
 
 USER node
