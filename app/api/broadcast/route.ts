@@ -6,6 +6,7 @@ import { requireUser, unauthorized } from '@/lib/require-user';
 import { MIME_EXT, sniffMime } from '@/lib/mime';
 
 const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100 MB
+const MAX_FORM_OVERHEAD = 1024 * 1024; // multipart boundaries and the other form fields
 
 const formatAnthiasDate = (d: any) => {
     try {
@@ -18,6 +19,14 @@ const formatAnthiasDate = (d: any) => {
 
 export async function POST(req: Request) {
     if (!(await requireUser())) return unauthorized();
+
+    // Checked before the body is parsed, otherwise the whole upload would already be held in memory
+    const declaredLength = Number(req.headers.get('content-length'));
+    if (!declaredLength) return NextResponse.json({ error: "length_required" }, { status: 411 });
+    if (declaredLength > MAX_FILE_SIZE + MAX_FORM_OVERHEAD) {
+        return NextResponse.json({ error: "file_too_large" }, { status: 413 });
+    }
+
     try {
         const data = await req.formData();
         const file = data.get('file') as File;

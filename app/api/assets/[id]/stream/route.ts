@@ -17,7 +17,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
 
     let data: any;
     try {
-        const res = await anthias.get(`http://${screens[0].ip.trim()}/api/v2/assets/${id}/content`, { timeout: 30000 });
+        const res = await anthias.get(`http://${screens[0].ip.trim()}/api/v2/assets/${id}/content`, { timeout: 30000, maxContentLength: 150 * 1024 * 1024 });
         data = res.data;
     } catch {
         return NextResponse.json({ error: "not_found" }, { status: 404 });

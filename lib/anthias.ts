@@ -7,4 +7,5 @@ const password = process.env.ANTHIAS_PASSWORD;
 // enabled in their settings, set ANTHIAS_USER / ANTHIAS_PASSWORD and it is applied to all requests.
 export const anthias = axios.create({
     auth: user && password ? { username: user, password } : undefined,
+    timeout: 30000,
 });

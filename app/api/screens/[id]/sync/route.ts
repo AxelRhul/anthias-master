@@ -5,6 +5,9 @@ import { prisma } from '@/lib/prisma';
 import { MIME_EXT, sniffMime } from '@/lib/mime';
 import { requireUser, unauthorized } from '@/lib/require-user';
 
+// A 100 MB file is ~134 MB once base64-encoded by Anthias; anything larger is refused instead of buffered
+const MAX_CONTENT_BYTES = 150 * 1024 * 1024;
+
 const toAnthiasDate = (d: string) => new Date(d).toISOString().split('.')[0] + 'Z';
 
 const listAssets = async (ip: string): Promise<any[]> => {
@@ -49,7 +52,7 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
         try {
             const content = await anthias.get(`http://${source.ip}/api/v2/assets/${asset.asset_id}/content`, {
                 timeout: 120000,
-                maxContentLength: Infinity,
+                maxContentLength: MAX_CONTENT_BYTES,
             });
             if (!content.data?.content) throw new Error('no_content');
 
@@ -67,7 +70,7 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
             const fileRes = await anthias.post(`http://${targetIp}/api/v2/file_asset`, form, {
                 headers: form.getHeaders(),
                 timeout: 120000,
-                maxBodyLength: Infinity,
+                maxBodyLength: MAX_CONTENT_BYTES,
             });
 
             await anthias.post(`http://${targetIp}/api/v2/assets`, {
