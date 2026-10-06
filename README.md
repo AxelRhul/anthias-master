@@ -9,8 +9,8 @@ A **Next.js** web application for centrally managing an [Anthias](https://github
 - **Media sync** — copy the media of an existing screen to a new or out-of-date one, with one click on the sync icon (automatic when a screen is added)
 - **Media library** — view and edit already-deployed assets (name, duration, dates, enabled state)
 - **Authentication** — login via Microsoft (Entra ID / Azure AD) or email + password
-- **Role-based access** — three roles: `ADMIN`, `USER`, `PENDING`; new users wait for approval
-- **User management** — admin panel to approve, promote or revoke users
+- **Role-based access** — four roles: `SUPER_ADMIN`, `ADMIN`, `USER`, `PENDING`; new users wait for approval
+- **User management** — admin panel to approve new users and switch them between `USER` and `ADMIN`
 - **Multilingual** — French and English UI, switchable without a page reload (via `NEXT_LOCALE` cookie)
 
 ## Tech Stack
@@ -138,7 +138,7 @@ Users can be created manually with the provided script:
 npx tsx scripts/create-user.ts <email> <password> [display name]
 ```
 
-Users created this way are automatically assigned the `ADMIN` role. Running the script again for an existing email resets its password and restores the `ADMIN` role (useful to recover a locked-out admin).
+The user created this way is the **`SUPER_ADMIN`**. There can only be one: the script refuses to run if another `SUPER_ADMIN` already exists. Running it again with the same email resets the password and restores the `SUPER_ADMIN` role (useful to recover a locked-out account).
 
 ## Media Sync
 
@@ -153,12 +153,13 @@ Adding a screen does not copy existing media by itself. The sync (automatic righ
 
 | Role | Access |
 |------|--------|
-| `ADMIN` | Full access: screen management (add / remove), media, and user management (`/admin/users`) |
+| `SUPER_ADMIN` | Everything an admin can do, plus promote / demote admins. Only exists through `scripts/create-user.ts` and cannot be assigned from the UI or API |
+| `ADMIN` | Screen management (add / remove), media, and user management: approve new users, switch non-admin users between `USER` and `ADMIN`. Cannot modify other admins |
 | `USER` | Media only: broadcast, view, edit assets. Can see the screen fleet but cannot add or remove screens |
 | `PENDING` | Blocked — sees a waiting page until an admin approves them |
 
-New Microsoft sign-ins start as `PENDING`. Admins approve them at `/admin/users`.  
-An admin cannot change their own role (prevents accidental self-demotion).
+New Microsoft sign-ins start as `PENDING`. On first login an admin clicks **Approve** at `/admin/users` (the user becomes `USER`). After that the role is a simple `USER` / `ADMIN` dropdown.  
+Nobody can change their own role, and nobody can modify the `SUPER_ADMIN`.
 
 ## Project Structure
 
@@ -188,7 +189,7 @@ An admin cannot change their own role (prevents accidental self-demotion).
 │   ├── prisma.ts               # Prisma client (BetterSqlite3 adapter)
 │   └── validate.ts             # IP/hostname and asset ID validators
 ├── scripts/
-│   └── create-user.ts          # CLI to create admin users
+│   └── create-user.ts          # CLI to create the SUPER_ADMIN
 ├── auth.ts                     # NextAuth config (providers + callbacks)
 ├── middleware.ts               # Auth + role guard for all routes
 ├── messages/
@@ -215,7 +216,7 @@ An admin cannot change their own role (prevents accidental self-demotion).
 | `PUT` | `/api/assets/[id]` | USER+ | Update asset metadata on all screens |
 | `POST` | `/api/broadcast` | USER+ | Upload file + create asset on all screens |
 | `GET` | `/api/admin/users` | ADMIN | List all users |
-| `PATCH` | `/api/admin/users` | ADMIN | Update a user's role |
+| `PATCH` | `/api/admin/users` | ADMIN | Update a user's role (admins can only modify non-admin users) |
 
 > Screen calls proxy to the Anthias REST API v2 (`http://<ip>/api/v2`).
 
