@@ -1,6 +1,6 @@
 import { Eye, Edit3, Image as ImageIcon, Film, Trash2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import type { Asset } from '@/lib/types';
+import type { Asset } from '@/features/assets/types';
 
 type AssetLibraryProps = {
   assets: Asset[];

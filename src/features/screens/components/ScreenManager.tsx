@@ -2,8 +2,8 @@
 import { useRef, useState } from 'react';
 import { Wifi, WifiOff, Trash2, RefreshCw } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { isValidHost } from '@/lib/validate';
-import type { Screen } from '@/lib/types';
+import { isValidHost } from '@/features/screens/validate-host';
+import type { Screen } from '@/features/screens/types';
 
 type ScreenManagerProps = {
     screens: Screen[];

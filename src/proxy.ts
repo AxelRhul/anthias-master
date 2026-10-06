@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
-import { isAdminRole } from "@/lib/roles";
+import { isAdminRole } from "@/features/auth/roles";
 
 const MUTATING = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 

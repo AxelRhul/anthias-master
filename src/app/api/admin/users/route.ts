@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAdmin } from "@/lib/require-admin";
-import { ASSIGNABLE_ROLES, canModifyUser } from "@/lib/roles";
+import { requireAdmin } from "@/features/auth/require-admin";
+import { ASSIGNABLE_ROLES, canModifyUser } from "@/features/auth/roles";
 
 export async function GET() {
     if (!(await requireAdmin())) {

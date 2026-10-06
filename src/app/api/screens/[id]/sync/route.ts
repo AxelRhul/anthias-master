@@ -2,10 +2,10 @@ import { NextResponse } from 'next/server';
 import { anthias } from '@/lib/anthias';
 import FormData from 'form-data';
 import { prisma } from '@/lib/prisma';
-import { MIME_EXT, sniffMime } from '@/lib/mime';
-import { requireUser, unauthorized } from '@/lib/require-user';
+import { MIME_EXT, sniffMime } from '@/features/assets/mime';
+import { requireUser, unauthorized } from '@/features/auth/require-user';
 import { errorDetail } from '@/lib/errors';
-import type { Asset } from '@/lib/types';
+import type { Asset } from '@/features/assets/types';
 
 // A 100 MB file is ~134 MB once base64-encoded by Anthias; anything larger is refused instead of buffered
 const MAX_CONTENT_BYTES = 150 * 1024 * 1024;

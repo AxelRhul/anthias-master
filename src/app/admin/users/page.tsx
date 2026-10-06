@@ -3,8 +3,8 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { CheckCircle, ShieldCheck, Clock, Users, Crown } from "lucide-react";
 import Link from "next/link";
-import { canModifyUser } from "@/lib/roles";
-import type { AppUser } from "@/lib/types";
+import { canModifyUser } from "@/features/auth/roles";
+import type { AppUser } from "@/features/users/types";
 
 const ROLE_STYLES: Record<string, string> = {
     SUPER_ADMIN: "bg-purple-500/10 text-purple-400 border border-purple-500/20",

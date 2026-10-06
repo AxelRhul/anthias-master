@@ -2,13 +2,14 @@
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useSession } from 'next-auth/react';
-import { isAdminRole } from '@/lib/roles';
+import { isAdminRole } from '@/features/auth/roles';
 import { Header } from '@/components/Header';
-import { ScreenManager } from '@/components/ScreenManager';
-import { BroadcastForm } from '@/components/BroadcastForm';
-import { AssetLibrary } from '@/components/AssetLibrary';
+import { ScreenManager } from '@/features/screens/components/ScreenManager';
+import { BroadcastForm } from '@/features/assets/components/BroadcastForm';
+import { AssetLibrary } from '@/features/assets/components/AssetLibrary';
 import { Toast } from '@/components/Toast';
-import type { Asset, Screen } from '@/lib/types';
+import type { Asset } from '@/features/assets/types';
+import type { Screen } from '@/features/screens/types';
 import { Save, X } from 'lucide-react';
 
 export default function MasterOps() {

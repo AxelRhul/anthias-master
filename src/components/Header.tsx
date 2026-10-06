@@ -3,7 +3,7 @@ import { Monitor, RefreshCcw, LogOut, Users } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 import { signOut, useSession } from "next-auth/react";
-import { isAdminRole } from "@/lib/roles";
+import { isAdminRole } from "@/features/auth/roles";
 
 export const Header = ({ loading, onRefresh }: { loading: boolean; onRefresh: () => void }) => {
     const t = useTranslations('Header');

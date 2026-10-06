@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { isValidAssetId } from '@/lib/validate';
-import { sniffMime } from '@/lib/mime';
+import { isValidAssetId } from '@/features/assets/validate-id';
+import { sniffMime } from '@/features/assets/mime';
 import { anthias } from '@/lib/anthias';
-import { requireUser, unauthorized } from '@/lib/require-user';
+import { requireUser, unauthorized } from '@/features/auth/require-user';
 
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
     if (!(await requireUser())) return unauthorized();

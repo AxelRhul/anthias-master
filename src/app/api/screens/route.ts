@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { isValidHost } from '@/lib/validate';
-import { isSafeScreenHost } from '@/lib/ssrf';
+import { isValidHost } from '@/features/screens/validate-host';
+import { isSafeScreenHost } from '@/features/screens/ssrf';
 import { errorCode } from '@/lib/errors';
-import { requireAdmin } from '@/lib/require-admin';
-import { requireUser, unauthorized } from '@/lib/require-user';
+import { requireAdmin } from '@/features/auth/require-admin';
+import { requireUser, unauthorized } from '@/features/auth/require-user';
 import { anthias } from '@/lib/anthias';
 
 export async function GET() {

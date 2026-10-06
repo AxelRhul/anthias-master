@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { isValidAssetId } from '@/lib/validate';
-import { deleteAssetsEverywhere } from '@/lib/anthias-delete';
-import { requireUser, unauthorized } from '@/lib/require-user';
+import { isValidAssetId } from '@/features/assets/validate-id';
+import { deleteAssetsEverywhere } from '@/features/assets/delete-everywhere';
+import { requireUser, unauthorized } from '@/features/auth/require-user';
 import { anthias } from '@/lib/anthias';
 
 const formatAnthiasDate = (d: string) => {

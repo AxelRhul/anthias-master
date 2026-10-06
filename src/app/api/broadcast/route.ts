@@ -2,8 +2,8 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { anthias } from '@/lib/anthias';
 import FormData from 'form-data';
-import { requireUser, unauthorized } from '@/lib/require-user';
-import { MIME_EXT, sniffMime } from '@/lib/mime';
+import { requireUser, unauthorized } from '@/features/auth/require-user';
+import { MIME_EXT, sniffMime } from '@/features/assets/mime';
 import { errorDetail } from '@/lib/errors';
 
 const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100 MB

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/auth";
-import { isAdminRole } from "@/lib/roles";
+import { authOptions } from "@/features/auth/auth-options";
+import { isAdminRole } from "@/features/auth/roles";
 
 // Reads the role from the database (via the jwt callback), so a revoked user is rejected immediately.
 export async function requireUser() {

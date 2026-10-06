@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { deleteAssetsEverywhere } from '@/lib/anthias-delete';
-import { requireUser, unauthorized } from '@/lib/require-user';
+import { deleteAssetsEverywhere } from '@/features/assets/delete-everywhere';
+import { requireUser, unauthorized } from '@/features/auth/require-user';
 import { anthias } from '@/lib/anthias';
-import type { Asset } from '@/lib/types';
+import type { Asset } from '@/features/assets/types';
 
 export async function GET() {
     if (!(await requireUser())) return unauthorized();

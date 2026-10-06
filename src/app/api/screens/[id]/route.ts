@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { requireAdmin } from '@/lib/require-admin';
+import { requireAdmin } from '@/features/auth/require-admin';
 import { errorCode } from '@/lib/errors';
 
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {

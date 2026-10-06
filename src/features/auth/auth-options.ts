@@ -4,7 +4,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
-import { clearFailures, isLimited, recordFailure } from "@/lib/rate-limit";
+import { clearFailures, isLimited, recordFailure } from "@/features/auth/rate-limit";
 
 let cachedDummyHash: string | undefined;
 const dummyHash = () => (cachedDummyHash ??= bcrypt.hashSync("anthias-master-dummy-password", 12));
