@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { anthias } from '@/lib/anthias';
 
 type Screen = { ip: string };
 type SourceAsset = { asset_id: string; name: string };
@@ -15,7 +15,7 @@ export async function deleteAssetsEverywhere(screens: Screen[], sourceAssets: So
 
     for (const asset of sourceAssets) {
         try {
-            await axios.delete(`${base(source)}/${asset.asset_id}`, { timeout: 10000 });
+            await anthias.delete(`${base(source)}/${asset.asset_id}`, { timeout: 10000 });
             deleted++;
         } catch (err: any) {
             failed++;
@@ -25,11 +25,11 @@ export async function deleteAssetsEverywhere(screens: Screen[], sourceAssets: So
 
     for (const screen of others) {
         try {
-            const res = await axios.get(base(screen), { timeout: 5000 });
+            const res = await anthias.get(base(screen), { timeout: 5000 });
             const matches: any[] = (Array.isArray(res.data) ? res.data : []).filter((a: any) => names.has(a.name));
             for (const a of matches) {
                 try {
-                    await axios.delete(`${base(screen)}/${a.asset_id}`, { timeout: 10000 });
+                    await anthias.delete(`${base(screen)}/${a.asset_id}`, { timeout: 10000 });
                 } catch (err: any) {
                     failed++;
                     console.error(`[delete] ${a.name} on ${screen.ip}:`, err.response?.data || err.message);

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import axios from 'axios';
+import { anthias } from '@/lib/anthias';
 import FormData from 'form-data';
 import { prisma } from '@/lib/prisma';
 import { MIME_EXT, sniffMime } from '@/lib/mime';
@@ -8,7 +8,7 @@ import { requireUser, unauthorized } from '@/lib/require-user';
 const toAnthiasDate = (d: string) => new Date(d).toISOString().split('.')[0] + 'Z';
 
 const listAssets = async (ip: string): Promise<any[]> => {
-    const res = await axios.get(`http://${ip}/api/v2/assets`, { timeout: 5000 });
+    const res = await anthias.get(`http://${ip}/api/v2/assets`, { timeout: 5000 });
     return Array.isArray(res.data) ? res.data : [];
 };
 
@@ -47,7 +47,7 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
     let failed = 0;
     for (const asset of missing) {
         try {
-            const content = await axios.get(`http://${source.ip}/api/v2/assets/${asset.asset_id}/content`, {
+            const content = await anthias.get(`http://${source.ip}/api/v2/assets/${asset.asset_id}/content`, {
                 timeout: 120000,
                 maxContentLength: Infinity,
             });
@@ -64,13 +64,13 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
                 filename,
                 contentType: mime,
             });
-            const fileRes = await axios.post(`http://${targetIp}/api/v2/file_asset`, form, {
+            const fileRes = await anthias.post(`http://${targetIp}/api/v2/file_asset`, form, {
                 headers: form.getHeaders(),
                 timeout: 120000,
                 maxBodyLength: Infinity,
             });
 
-            await axios.post(`http://${targetIp}/api/v2/assets`, {
+            await anthias.post(`http://${targetIp}/api/v2/assets`, {
                 ext: fileRes.data.ext,
                 name: asset.name,
                 uri: fileRes.data.uri,

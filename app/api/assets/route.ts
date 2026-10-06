@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { deleteAssetsEverywhere } from '@/lib/anthias-delete';
 import { requireUser, unauthorized } from '@/lib/require-user';
-import axios from 'axios';
+import { anthias } from '@/lib/anthias';
 
 export async function GET() {
     if (!(await requireUser())) return unauthorized();
@@ -10,7 +10,7 @@ export async function GET() {
     if (screens.length === 0 || !screens[0].ip) return NextResponse.json([]);
 
     try {
-        const res = await axios.get(`http://${screens[0].ip.trim()}/api/v2/assets`, { timeout: 4000 });
+        const res = await anthias.get(`http://${screens[0].ip.trim()}/api/v2/assets`, { timeout: 4000 });
         return NextResponse.json(res.data);
     } catch (err) {
         return NextResponse.json({ error: "Impossible de lister" }, { status: 500 });
@@ -25,7 +25,7 @@ export async function DELETE() {
 
     let disabled: { asset_id: string; name: string }[];
     try {
-        const res = await axios.get(`http://${screens[0].ip.trim()}/api/v2/assets`, { timeout: 5000 });
+        const res = await anthias.get(`http://${screens[0].ip.trim()}/api/v2/assets`, { timeout: 5000 });
         disabled = (Array.isArray(res.data) ? res.data : []).filter((a: any) => !a.is_enabled);
     } catch {
         return NextResponse.json({ error: "source_unreachable" }, { status: 502 });

@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { isValidHost } from '@/lib/validate';
 import { requireAdmin } from '@/lib/require-admin';
 import { requireUser, unauthorized } from '@/lib/require-user';
-import axios from 'axios';
+import { anthias } from '@/lib/anthias';
 
 export async function GET() {
     if (!(await requireUser())) return unauthorized();
@@ -12,7 +12,7 @@ export async function GET() {
 
         const monitoredScreens = await Promise.all(screens.map(async (s) => {
             try {
-                await axios.get(`http://${s.ip}/api/v2/assets`, { timeout: 1000 });
+                await anthias.get(`http://${s.ip}/api/v2/assets`, { timeout: 1000 });
                 return { ...s, online: true };
             } catch {
                 return { ...s, online: false };

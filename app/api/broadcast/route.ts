@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import axios from 'axios';
+import { anthias } from '@/lib/anthias';
 import FormData from 'form-data';
 import { requireUser, unauthorized } from '@/lib/require-user';
 import { MIME_EXT, sniffMime } from '@/lib/mime';
@@ -61,7 +61,7 @@ export async function POST(req: Request) {
                     contentType: mimeType,
                 });
 
-                const fileRes = await axios.post(`${baseUrl}/file_asset`, form, {
+                const fileRes = await anthias.post(`${baseUrl}/file_asset`, form, {
                     headers: form.getHeaders(),
                     timeout: 30000,
                 });
@@ -81,7 +81,7 @@ export async function POST(req: Request) {
                     skip_asset_check: true,
                 };
 
-                await axios.post(`${baseUrl}/assets`, assetPayload, {
+                await anthias.post(`${baseUrl}/assets`, assetPayload, {
                     headers: { 'Content-Type': 'application/json' },
                     timeout: 10000,
                 });

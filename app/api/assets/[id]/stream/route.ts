@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { isValidAssetId } from '@/lib/validate';
 import { sniffMime } from '@/lib/mime';
+import { anthias } from '@/lib/anthias';
 import { requireUser, unauthorized } from '@/lib/require-user';
 
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -14,11 +15,14 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     const screens = await prisma.screen.findMany({ orderBy: { id: 'asc' } });
     if (screens.length === 0) return NextResponse.json({ error: "no_screen" }, { status: 404 });
 
-    const contentRes = await fetch(`http://${screens[0].ip.trim()}/api/v2/assets/${id}/content`);
-    if (!contentRes.ok) return NextResponse.json({ error: "not_found" }, { status: 404 });
-
-    const data = await contentRes.json();
-    if (!data.content) return NextResponse.json({ error: "no_content" }, { status: 404 });
+    let data: any;
+    try {
+        const res = await anthias.get(`http://${screens[0].ip.trim()}/api/v2/assets/${id}/content`, { timeout: 30000 });
+        data = res.data;
+    } catch {
+        return NextResponse.json({ error: "not_found" }, { status: 404 });
+    }
+    if (!data?.content) return NextResponse.json({ error: "no_content" }, { status: 404 });
 
     const binary = Buffer.from(data.content, 'base64');
 
