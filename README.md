@@ -5,14 +5,15 @@ A **Next.js** web application for centrally managing an [Anthias](https://github
 ## Features
 
 - **Group broadcast** — push an image or video to the entire fleet in one click
-- **Screen management** — register any Anthias instance by IP/hostname, remove it if needed
+- **Screen management** — register any Anthias instance by IP/hostname, remove it if needed; the `SUPER_ADMIN` can rename a screen and store the Basic-authentication login of devices that require one (password encrypted)
 - **Asset deletion** — delete an asset from the whole fleet, or remove every disabled (OFF) asset in one click, with a confirmation step
 - **Media sync** — copy the media of an existing screen to a new or out-of-date one, with one click on the sync icon (automatic when a screen is added)
 - **Media library** — view and edit already-deployed assets (name, duration, dates, enabled state)
 - **Authentication** — login via Microsoft (Entra ID / Azure AD) or email + password
 - **Role-based access** — four roles: `SUPER_ADMIN`, `ADMIN`, `USER`, `PENDING`; new users wait for approval
-- **User management** — admin panel to approve new users and switch them between `USER` and `ADMIN`
-- **Built-in guide** — a `/guide` page (button next to Refresh) explaining how to broadcast, manage media and use the dashboard, in French and English
+- **User management** — admin panel to approve new users and switch them between `USER` and `ADMIN`; the `SUPER_ADMIN` can also delete accounts
+- **Built-in guide** — a `/guide` page (button next to Refresh) explaining how to broadcast, manage media and use the dashboard, in French and English; screenshots open full screen with zoom and pan
+- **Fixed header** — the top bar stays visible while scrolling the dashboard and the guide
 - **Multilingual** — French and English UI, switchable without a page reload (via `NEXT_LOCALE` cookie)
 
 ## Tech Stack
@@ -257,7 +258,7 @@ The `@/` import alias points to `src/` (e.g. `@/features/auth/roles`).
 
 The `/guide` page is built from the texts in `src/messages/fr.json` and `en.json` (namespace `Guide`) and the section list in `src/features/guide/sections.ts`. To add a section, add it to `sections.ts` and write its `title`, `intro`, `steps` (and optional `tip`, `images`) in both message files.
 
-Screenshots are plain files in `public/images/guide/` (PNG, about 1400 px wide, French interface, no real IP addresses or e-mails). A screenshot that does not exist yet is simply not displayed (in development, a dashed placeholder shows the expected file name).
+Screenshots are plain files in `public/images/guide/` (PNG, about 1400 px wide, French interface, no real IP addresses or e-mails). A screenshot that does not exist yet is simply not displayed (in development, a dashed placeholder shows the expected file name). Each screenshot can be clicked to open it full screen: mouse wheel or +/- buttons to zoom, drag to move, double-click to toggle zoom, pinch on touch screens, `Esc` to close (component: `src/features/guide/components/ZoomableImage.tsx`).
 
 | File | What it shows |
 |------|---------------|
