@@ -9,10 +9,14 @@ import { requireUser, unauthorized } from '@/features/auth/require-user';
 import { isSuperAdmin } from '@/features/auth/roles';
 import { anthiasFor } from '@/lib/anthias';
 
+// With Basic authentication a Raspberry Pi takes over a second to answer (it checks the password on every
+// request), so the presence check must wait longer than that. Devices are probed in parallel.
+const PROBE_TIMEOUT_MS = 5000;
+
 // A device that answers 401/403 is reachable but refuses our credentials
 async function probe(screen: Parameters<typeof anthiasFor>[0]) {
     try {
-        await anthiasFor(screen).get('/assets', { timeout: 1000 });
+        await anthiasFor(screen).get('/assets', { timeout: PROBE_TIMEOUT_MS });
         return { online: true, authFailed: false };
     } catch (err) {
         const status = errorStatus(err);
