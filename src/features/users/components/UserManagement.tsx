@@ -1,9 +1,10 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
-import { CheckCircle, ShieldCheck, Clock, Users, Crown } from "lucide-react";
+import { CheckCircle, ShieldCheck, Clock, Users, Crown, Trash2 } from "lucide-react";
 import Link from "next/link";
-import { canModifyUser } from "@/features/auth/roles";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { canDeleteUser, canModifyUser } from "@/features/auth/roles";
 import type { AppUser } from "@/features/users/types";
 
 const ROLE_STYLES: Record<string, string> = {
@@ -26,6 +27,8 @@ export function UserManagement() {
     const myRole = session?.user?.role;
     const [users, setUsers] = useState<AppUser[]>([]);
     const [loading, setLoading] = useState(true);
+    const [toDelete, setToDelete] = useState<AppUser | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
     const load = async () => {
         try {
@@ -48,6 +51,20 @@ export function UserManagement() {
         load();
     };
 
+    const deleteUser = async () => {
+        if (!toDelete) return;
+        const target = toDelete;
+        setToDelete(null);
+        const res = await fetch(`/api/admin/users/${target.id}`, { method: "DELETE" });
+        if (!res.ok) {
+            console.error("[admin/users] DELETE failed", res.status, await res.json().catch(() => null));
+            setError("La suppression du compte a échoué.");
+        } else {
+            setError(null);
+        }
+        load();
+    };
+
     useEffect(() => { load(); }, []);
 
     return (
@@ -57,6 +74,10 @@ export function UserManagement() {
                     <Users size={28} className="text-blue-500" />
                     <h1 className="text-2xl font-black text-blue-500 italic">Gestion des utilisateurs</h1>
                 </div>
+
+                {error && (
+                    <div className="bg-rose-500/10 border border-rose-500/20 text-rose-400 text-sm px-4 py-3 rounded-xl">{error}</div>
+                )}
 
                 <div className="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden">
                     {loading ? (
@@ -85,7 +106,7 @@ export function UserManagement() {
                                         <td className="px-6 py-4">
                                             <div className="flex gap-2">
                                                 {user.id === myId && <span className="text-xs text-slate-500 italic">Vous</span>}
-                                                {user.id !== myId && !canModifyUser(myId, myRole, user) && <span className="text-xs text-slate-600 italic">—</span>}
+                                                {user.id !== myId && !canModifyUser(myId, myRole, user) && !canDeleteUser(myId, myRole, user) && <span className="text-xs text-slate-600 italic">—</span>}
                                                 {canModifyUser(myId, myRole, user) && user.role === "PENDING" && (
                                                     <button onClick={() => setRole(user.id, "USER")}
                                                         className="px-3 py-1.5 text-xs font-bold bg-emerald-600/20 hover:bg-emerald-600/40 text-emerald-400 rounded-xl transition flex items-center gap-1">
@@ -102,6 +123,15 @@ export function UserManagement() {
                                                         <option value="ADMIN">ADMIN</option>
                                                     </select>
                                                 )}
+                                                {canDeleteUser(myId, myRole, user) && (
+                                                    <button
+                                                        onClick={() => setToDelete(user)}
+                                                        title="Supprimer le compte"
+                                                        className="p-1.5 text-slate-600 hover:text-rose-500 transition-colors"
+                                                    >
+                                                        <Trash2 size={16} />
+                                                    </button>
+                                                )}
                                             </div>
                                         </td>
                                     </tr>
@@ -113,6 +143,17 @@ export function UserManagement() {
 
                 <Link href="/" className="text-slate-500 hover:text-slate-300 text-sm transition">← Retour au tableau de bord</Link>
             </div>
+
+            {toDelete && (
+                <ConfirmDialog
+                    title="Supprimer le compte"
+                    message={`Supprimer définitivement le compte de ${toDelete.name ?? toDelete.email ?? "cet utilisateur"} ? Cette action est irréversible.`}
+                    cancelLabel="Annuler"
+                    confirmLabel="Supprimer"
+                    onCancel={() => setToDelete(null)}
+                    onConfirm={deleteUser}
+                />
+            )}
         </div>
     );
 }
