@@ -4,6 +4,8 @@ import { isValidAssetId } from '@/features/assets/validate-id';
 import { deleteAssetsEverywhere } from '@/features/assets/delete-everywhere';
 import { requireUser, unauthorized } from '@/features/auth/require-user';
 import { anthiasFor } from '@/lib/anthias';
+import { errorDetail } from '@/lib/errors';
+import { renameManaged } from '@/features/assets/managed';
 
 const formatAnthiasDate = (d: string) => {
     try {
@@ -61,7 +63,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     }
 
     const body = await req.json();
-    const screens = await prisma.screen.findMany();
+    const screens = await prisma.screen.findMany({ orderBy: { id: 'asc' } });
 
     const name = typeof body.name === 'string' ? body.name.trim().slice(0, 255) : '';
     const duration = parseInt(body.duration, 10);
@@ -79,6 +81,13 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
         play_order: isNaN(play_order) ? 0 : play_order,
     };
 
+    // Name before the edit, read from the library device, to keep a managed media managed after a rename
+    const previousName = screens.length > 0
+        ? await anthiasFor(screens[0]).get(`/assets/${id}`, { timeout: 5000 })
+            .then(res => (typeof res.data?.name === 'string' ? res.data.name : null))
+            .catch(() => null)
+        : null;
+
     const results = await Promise.all(screens.map(async (screen) => {
         try {
             await anthiasFor(screen).put(`/assets/${id}`, payload, { timeout: 5000 });
@@ -87,6 +96,10 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
             return { ip: screen.ip, status: "ERROR" };
         }
     }));
+
+    if (previousName && results.some(r => r.status === "OK")) {
+        await renameManaged(previousName, name).catch(err => console.error('[assets] cannot update the managed name:', errorDetail(err)));
+    }
 
     return NextResponse.json(results);
 }

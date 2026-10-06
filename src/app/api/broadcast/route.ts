@@ -5,6 +5,7 @@ import FormData from 'form-data';
 import { requireUser, unauthorized } from '@/features/auth/require-user';
 import { MIME_EXT, sniffMime } from '@/features/assets/mime';
 import { errorDetail } from '@/lib/errors';
+import { markManaged } from '@/features/assets/managed';
 
 const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100 MB
 const MAX_FORM_OVERHEAD = 1024 * 1024; // multipart boundaries and the other form fields
@@ -102,6 +103,9 @@ export async function POST(req: Request) {
                 results.push({ ip: screen.ip, status: 'ERROR' });
             }
         }
+        // From now on this media belongs to the fleet: the sync may copy it to other devices
+        if (results.some(r => r.status === 'OK')) await markManaged([name]);
+
         return NextResponse.json(results);
     } catch {
         return NextResponse.json({ error: "internal_error" }, { status: 500 });

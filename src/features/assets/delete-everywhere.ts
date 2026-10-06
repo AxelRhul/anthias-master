@@ -1,5 +1,6 @@
 import { anthiasFor, type AnthiasTarget } from '@/lib/anthias';
 import { errorDetail } from '@/lib/errors';
+import { normalizeName, unmarkManaged } from '@/features/assets/managed';
 
 type SourceAsset = { asset_id: string; name: string };
 
@@ -8,7 +9,8 @@ type SourceAsset = { asset_id: string; name: string };
 export async function deleteAssetsEverywhere(screens: AnthiasTarget[], sourceAssets: SourceAsset[]) {
     const [source, ...others] = screens;
     const sourceClient = anthiasFor(source);
-    const names = new Set(sourceAssets.map(a => a.name));
+    const names = new Set(sourceAssets.map(a => normalizeName(a.name)));
+    const deletedNames: string[] = [];
     let deleted = 0;
     let failed = 0;
 
@@ -16,6 +18,7 @@ export async function deleteAssetsEverywhere(screens: AnthiasTarget[], sourceAss
         try {
             await sourceClient.delete(`/assets/${asset.asset_id}`, { timeout: 10000 });
             deleted++;
+            deletedNames.push(asset.name);
         } catch (err) {
             failed++;
             console.error(`[delete] ${asset.name} on ${source.ip}:`, errorDetail(err));
@@ -27,7 +30,7 @@ export async function deleteAssetsEverywhere(screens: AnthiasTarget[], sourceAss
         try {
             const res = await client.get('/assets', { timeout: 5000 });
             const list: SourceAsset[] = Array.isArray(res.data) ? res.data : [];
-            for (const a of list.filter(item => names.has(item.name))) {
+            for (const a of list.filter(item => names.has(normalizeName(item.name)))) {
                 try {
                     await client.delete(`/assets/${a.asset_id}`, { timeout: 10000 });
                 } catch (err) {
@@ -40,6 +43,9 @@ export async function deleteAssetsEverywhere(screens: AnthiasTarget[], sourceAss
             console.error(`[delete] cannot reach ${screen.ip}:`, errorDetail(err));
         }
     }
+
+    // A deleted media is no longer part of the fleet
+    await unmarkManaged(deletedNames);
 
     return { deleted, failed };
 }
