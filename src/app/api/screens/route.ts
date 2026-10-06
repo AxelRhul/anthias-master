@@ -2,24 +2,36 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { isValidHost } from '@/features/screens/validate-host';
 import { isSafeScreenHost } from '@/features/screens/ssrf';
-import { errorCode } from '@/lib/errors';
+import { toPublicScreen } from '@/features/screens/public-screen';
+import { errorCode, errorStatus } from '@/lib/errors';
 import { requireAdmin } from '@/features/auth/require-admin';
 import { requireUser, unauthorized } from '@/features/auth/require-user';
-import { anthias } from '@/lib/anthias';
+import { isSuperAdmin } from '@/features/auth/roles';
+import { anthiasFor } from '@/lib/anthias';
+
+// A device that answers 401/403 is reachable but refuses our credentials
+async function probe(screen: Parameters<typeof anthiasFor>[0]) {
+    try {
+        await anthiasFor(screen).get('/assets', { timeout: 1000 });
+        return { online: true, authFailed: false };
+    } catch (err) {
+        const status = errorStatus(err);
+        if (status === 401 || status === 403) return { online: true, authFailed: true };
+        return { online: false, authFailed: false };
+    }
+}
 
 export async function GET() {
-    if (!(await requireUser())) return unauthorized();
+    const session = await requireUser();
+    if (!session) return unauthorized();
+    const includeUsername = isSuperAdmin(session.user.role);
     try {
-        const screens = await prisma.screen.findMany();
+        const screens = await prisma.screen.findMany({ orderBy: { id: 'asc' } });
 
-        const monitoredScreens = await Promise.all(screens.map(async (s) => {
-            try {
-                await anthias.get(`http://${s.ip}/api/v2/assets`, { timeout: 1000 });
-                return { ...s, online: true };
-            } catch {
-                return { ...s, online: false };
-            }
-        }));
+        const monitoredScreens = await Promise.all(screens.map(async (s) => ({
+            ...toPublicScreen(s, includeUsername),
+            ...(await probe(s)),
+        })));
 
         return NextResponse.json(monitoredScreens);
     } catch {
@@ -50,7 +62,7 @@ export async function POST(req: Request) {
         }
 
         const screen = await prisma.screen.create({ data: { ip, label } });
-        return NextResponse.json(screen, { status: 201 });
+        return NextResponse.json(toPublicScreen(screen, false), { status: 201 });
     } catch (err) {
         if (errorCode(err) === 'P2002') {
             return NextResponse.json({ error: "ip_already_exists" }, { status: 409 });

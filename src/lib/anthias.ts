@@ -1,11 +1,34 @@
 import axios from 'axios';
+import { decryptSecret } from '@/lib/crypto';
 
-const user = process.env.ANTHIAS_USER;
-const password = process.env.ANTHIAS_PASSWORD;
+export type AnthiasTarget = {
+    ip: string;
+    username?: string | null;
+    passwordEnc?: string | null;
+};
 
-// Single HTTP client for every call to the Anthias devices. If the devices have "Basic authentication"
-// enabled in their settings, set ANTHIAS_USER / ANTHIAS_PASSWORD and it is applied to all requests.
-export const anthias = axios.create({
-    auth: user && password ? { username: user, password } : undefined,
-    timeout: 30000,
-});
+const fallbackUser = process.env.ANTHIAS_USER;
+const fallbackPassword = process.env.ANTHIAS_PASSWORD;
+
+function credentialsOf(screen: AnthiasTarget) {
+    if (screen.username && screen.passwordEnc) {
+        try {
+            return { username: screen.username, password: decryptSecret(screen.passwordEnc) };
+        } catch {
+            console.error(`[anthias] cannot decrypt the stored password of ${screen.ip} (wrong or missing CREDENTIALS_ENCRYPTION_KEY?)`);
+            return undefined;
+        }
+    }
+    // Devices without a login of their own use the optional global one
+    if (fallbackUser && fallbackPassword) return { username: fallbackUser, password: fallbackPassword };
+    return undefined;
+}
+
+// HTTP client bound to one Anthias device: base URL of its API v2 plus its Basic authentication, if any.
+export function anthiasFor(screen: AnthiasTarget) {
+    return axios.create({
+        baseURL: `http://${screen.ip.trim()}/api/v2`,
+        auth: credentialsOf(screen),
+        timeout: 30000,
+    });
+}

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { isValidAssetId } from '@/features/assets/validate-id';
 import { sniffMime } from '@/features/assets/mime';
-import { anthias } from '@/lib/anthias';
+import { anthiasFor } from '@/lib/anthias';
 import { requireUser, unauthorized } from '@/features/auth/require-user';
 
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -17,7 +17,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
 
     let data: { content?: string } | undefined;
     try {
-        const res = await anthias.get(`http://${screens[0].ip.trim()}/api/v2/assets/${id}/content`, { timeout: 30000, maxContentLength: 150 * 1024 * 1024 });
+        const res = await anthiasFor(screens[0]).get(`/assets/${id}/content`, { timeout: 30000, maxContentLength: 150 * 1024 * 1024 });
         data = res.data;
     } catch {
         return NextResponse.json({ error: "not_found" }, { status: 404 });
