@@ -92,9 +92,9 @@ COPY --from=builder --chown=node:node /app/prisma.config.ts ./prisma.config.ts
 COPY --from=builder --chown=node:node /app/node_modules ./node_modules
 
 COPY --from=builder --chown=node:node /app/scripts ./scripts
-COPY --from=builder --chown=node:node /app/lib ./lib
+COPY --from=builder --chown=node:node /app/src/lib/prisma.ts ./src/lib/prisma.ts
 
-COPY --chown=node:node docker-entrypoint.sh ./
+COPY --chown=node:node docker/entrypoint.sh ./docker-entrypoint.sh
 RUN chmod +x docker-entrypoint.sh && sed -i 's/\r//' docker-entrypoint.sh
 
 USER node

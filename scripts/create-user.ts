@@ -1,6 +1,6 @@
 import "dotenv/config";
 import readline from "node:readline";
-import { prisma } from "../lib/prisma";
+import { prisma } from "../src/lib/prisma";
 import bcrypt from "bcryptjs";
 
 const [rawEmail, name] = process.argv.slice(2);
