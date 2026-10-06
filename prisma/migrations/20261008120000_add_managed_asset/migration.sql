@@ -1,0 +1,5 @@
+-- CreateTable
+CREATE TABLE "ManagedAsset" (
+    "name" TEXT NOT NULL PRIMARY KEY,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma';
 import { MIME_EXT, sniffMime } from '@/features/assets/mime';
 import { requireUser, unauthorized } from '@/features/auth/require-user';
 import { errorDetail, errorStatus } from '@/lib/errors';
+import { managedNames, normalizeName } from '@/features/assets/managed';
 import type { Asset } from '@/features/assets/types';
 
 // A 100 MB file is ~134 MB once base64-encoded by Anthias; anything larger is refused instead of buffered
@@ -49,8 +50,12 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
         return NextResponse.json({ error: authFailed ? "target_auth_failed" : "target_unreachable" }, { status: 502 });
     }
 
-    const existingNames = new Set(existing.map(a => a.name));
-    const missing = source.assets.filter(a => !existingNames.has(a.name));
+    // Only the media managed by the app are copied: one added directly on a device through its own
+    // interface stays on that device.
+    const managed = await managedNames();
+    const syncable = source.assets.filter(a => managed.has(normalizeName(a.name)));
+    const existingNames = new Set(existing.map(a => normalizeName(a.name)));
+    const missing = syncable.filter(a => !existingNames.has(normalizeName(a.name)));
 
     let copied = 0;
     let failed = 0;
@@ -65,7 +70,8 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
             const buffer = Buffer.from(content.data.content, 'base64');
             const mime = sniffMime(buffer);
             if (!mime) throw new Error('unsupported_file_type');
-            const safeName = String(asset.name).replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 150) || 'asset';
+            const plainName = normalizeName(asset.name);
+            const safeName = plainName.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 150) || 'asset';
             const filename = `${safeName}.${MIME_EXT[mime]}`;
 
             const form = new FormData();
@@ -81,7 +87,7 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
 
             await targetClient.post('/assets', {
                 ext: fileRes.data.ext,
-                name: asset.name,
+                name: plainName,
                 uri: fileRes.data.uri,
                 start_date: toAnthiasDate(asset.start_date),
                 end_date: toAnthiasDate(asset.end_date),
@@ -101,5 +107,10 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
         }
     }
 
-    return NextResponse.json({ copied, failed, skipped: source.assets.length - missing.length });
+    return NextResponse.json({
+        copied,
+        failed,
+        skipped: syncable.length - missing.length,
+        ignored: source.assets.length - syncable.length,
+    });
 }

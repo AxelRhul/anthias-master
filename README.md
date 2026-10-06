@@ -192,9 +192,12 @@ Keep a backup of `CREDENTIALS_ENCRYPTION_KEY`: if it is lost or changed, the sto
 Adding a screen does not copy existing media by itself. The sync (automatic right after adding a screen, or via the sync icon on each screen) works as follows:
 
 - The source is the first other screen that responds, ordered by creation.
-- Media are matched by **name**: any media the target does not have is downloaded from the source and re-created on the target (same name, dates, order, enabled state).
+- Only the media **managed by the app** are copied: the ones it broadcast (or synced). A media added directly on a device through its own Anthias interface is not known to the app, so it stays on that device and is never copied to the others.
+- Media are matched by **name**: any managed media the target does not have is downloaded from the source and re-created on the target (same name, dates, order, enabled state).
 - It is one-way and additive: nothing is deleted on the target, and a media already present (same name) is skipped, so running it again is safe.
 - Videos are re-created with a duration of `0`, as required by the Anthias API.
+
+The managed names are stored in the `ManagedAsset` table. A media becomes managed when it is broadcast, stays managed when it is renamed from the app, and stops being managed when it is deleted from the app. **Upgrade:** the first time the library is loaded while the table is empty, the media already present on the reference device (the oldest screen) are adopted, so everything broadcast before this feature keeps syncing. Media added directly on a device *before* that first load are adopted too; add them afterwards to keep them local.
 
 ## Asset Deletion
 

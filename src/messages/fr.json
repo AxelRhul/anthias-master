@@ -96,7 +96,7 @@
         "steps": [
           "Icône Wi-Fi verte : l'écran répond. Icône barrée rouge : l'écran est injoignable (éteint, déconnecté du réseau…).",
           "Icône de bouclier orange : l'écran répond mais refuse la connexion de l'application. Prévenez le super administrateur, qui peut renseigner ses identifiants.",
-          "L'icône de synchronisation (deux flèches) copie sur cet écran les médias qu'il n'a pas encore, depuis un autre écran en ligne. Elle ne supprime rien, et la comparaison se fait sur le nom des médias.",
+          "L'icône de synchronisation (deux flèches) copie sur cet écran les médias qu'il n'a pas encore, depuis un autre écran en ligne. Elle ne supprime rien, ne copie que les médias envoyés depuis l'application (pas ceux ajoutés directement sur un écran), et la comparaison se fait sur le nom des médias.",
           "Un message indique le résultat : nombre de médias copiés, échecs, ou « appareil déjà à jour ».",
           "L'ajout, la suppression et les identifiants des écrans sont gérés par les administrateurs et ne sont pas détaillés ici."
         ],
@@ -135,6 +135,10 @@
           {
             "q": "« Trop de tentatives » s'affiche à la connexion.",
             "a": "Trop de mots de passe incorrects ont été saisis. Attendez 15 minutes avant de réessayer."
+          },
+          {
+            "q": "J'ai ajouté un média directement sur un écran : sera-t-il copié sur les autres ?",
+            "a": "Non. Un média ajouté depuis l'interface propre d'un écran reste sur cet écran : la synchronisation ne copie que les médias envoyés depuis Anthias Master."
           },
           {
             "q": "Les captures sont trop petites pour lire le texte.",
