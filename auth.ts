@@ -4,8 +4,12 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import { clearFailures, isLimited, recordFailure } from "@/lib/rate-limit";
 
-const GUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+let cachedDummyHash: string | undefined;
+const dummyHash = () => (cachedDummyHash ??= bcrypt.hashSync("anthias-master-dummy-password", 12));
+
+const GUID =/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const AZURE_TENANT = process.env.AZURE_AD_TENANT_ID?.trim();
 
 // Microsoft login is only enabled for ONE specific tenant (a GUID). "common" / "organizations" accept
@@ -39,14 +43,34 @@ export const authOptions: NextAuthOptions = {
                 email: { label: "Email", type: "email" },
                 password: { label: "Mot de passe", type: "password" },
             },
-            async authorize(credentials) {
+            async authorize(credentials, req) {
                 if (!credentials?.email || !credentials?.password) return null;
-                const user = await prisma.user.findUnique({
-                    where: { email: credentials.email },
+
+                const rawEmail = credentials.email.trim();
+                const email = rawEmail.toLowerCase();
+                // nginx appends the real client address last in X-Forwarded-For
+                const forwarded = req?.headers?.["x-forwarded-for"];
+                const ip = (typeof forwarded === "string" ? forwarded.split(",").pop()?.trim() : "") || "unknown";
+                const emailKey = `email:${email}`;
+                const ipKey = `ip:${ip}`;
+
+                if (isLimited(emailKey, 5) || isLimited(ipKey, 30)) {
+                    throw new Error("TooManyAttempts");
+                }
+
+                const user = await prisma.user.findFirst({
+                    where: { OR: [{ email }, { email: rawEmail }] },
                 });
-                if (!user?.passwordHash) return null;
-                const valid = await bcrypt.compare(credentials.password, user.passwordHash);
-                if (!valid) return null;
+
+                // Always run bcrypt so response time does not reveal whether the account exists
+                const valid = await bcrypt.compare(credentials.password, user?.passwordHash ?? dummyHash());
+                if (!user?.passwordHash || !valid) {
+                    recordFailure(emailKey);
+                    recordFailure(ipKey);
+                    return null;
+                }
+
+                clearFailures(emailKey);
                 return { id: user.id, email: user.email!, name: user.name };
             },
         }),

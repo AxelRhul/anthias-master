@@ -19,7 +19,8 @@ export default function LoginPage() {
         setLoading(true);
         setError("");
         const res = await signIn("credentials", { email, password, redirect: false });
-        if (res?.error) setError("Email ou mot de passe incorrect.");
+        if (res?.error === "TooManyAttempts") setError("Trop de tentatives. Réessayez dans 15 minutes.");
+        else if (res?.error) setError("Email ou mot de passe incorrect.");
         else window.location.href = "/";
         setLoading(false);
     };
