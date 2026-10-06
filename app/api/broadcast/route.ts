@@ -1,15 +1,17 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import axios from 'axios';
+import { anthias } from '@/lib/anthias';
 import FormData from 'form-data';
+import { requireUser, unauthorized } from '@/lib/require-user';
+import { MIME_EXT, sniffMime } from '@/lib/mime';
+import { errorDetail } from '@/lib/errors';
 
 const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100 MB
+const MAX_FORM_OVERHEAD = 1024 * 1024; // multipart boundaries and the other form fields
 
-const ALLOWED_MIME_PREFIXES = ['image/', 'video/'];
-
-const formatAnthiasDate = (d: any) => {
+const formatAnthiasDate = (d: FormDataEntryValue | null) => {
     try {
-        const date = d ? new Date(d) : new Date();
+        const date = typeof d === 'string' && d ? new Date(d) : new Date();
         return date.toISOString().split('.')[0] + 'Z';
     } catch {
         return new Date().toISOString().split('.')[0] + 'Z';
@@ -17,37 +19,46 @@ const formatAnthiasDate = (d: any) => {
 };
 
 export async function POST(req: Request) {
+    if (!(await requireUser())) return unauthorized();
+
+    // Checked before the body is parsed, otherwise the whole upload would already be held in memory
+    const declaredLength = Number(req.headers.get('content-length'));
+    if (!declaredLength) return NextResponse.json({ error: "length_required" }, { status: 411 });
+    if (declaredLength > MAX_FILE_SIZE + MAX_FORM_OVERHEAD) {
+        return NextResponse.json({ error: "file_too_large" }, { status: 413 });
+    }
+
     try {
         const data = await req.formData();
-        const file = data.get('file') as File;
-        if (!file) return NextResponse.json({ error: "no_file" }, { status: 400 });
+        const file = data.get('file');
+        if (!(file instanceof File)) return NextResponse.json({ error: "no_file" }, { status: 400 });
 
         if (file.size > MAX_FILE_SIZE) {
             return NextResponse.json({ error: "file_too_large" }, { status: 413 });
         }
 
-        const mimeType = file.type || '';
-        if (!ALLOWED_MIME_PREFIXES.some(prefix => mimeType.startsWith(prefix))) {
+        const buffer = Buffer.from(await file.arrayBuffer());
+        const mimeType = sniffMime(buffer);
+        if (!mimeType) {
             return NextResponse.json({ error: "invalid_file_type" }, { status: 415 });
         }
 
-        const rawName = data.get('name') as string;
-        const name = (rawName?.trim().slice(0, 255)) || file.name.slice(0, 255);
+        const rawName = data.get('name');
+        const name = (typeof rawName === 'string' ? rawName.trim().slice(0, 255) : '') || file.name.slice(0, 255);
         const isVideo = mimeType.startsWith('video/');
         const duration = isVideo ? 0 : (Math.floor(Number(data.get('duration'))) || 10);
         const play_order = Math.floor(Number(data.get('play_order'))) || 0;
-        const start_date = data.get('start_date') as string;
-        const end_date = data.get('end_date') as string;
+        const start_date = data.get('start_date');
+        const end_date = data.get('end_date');
 
-        // Sanitize filename: keep only safe characters
-        const safeFilename = file.name.replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 200);
+        // Safe characters only, and the extension always matches the detected type
+        const baseName = file.name.replace(/\.[^.]*$/, '').replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 150) || 'asset';
+        const safeFilename = `${baseName}.${MIME_EXT[mimeType]}`;
 
         const screens = await prisma.screen.findMany();
         if (screens.length === 0) {
             return NextResponse.json({ error: "no_screens" }, { status: 400 });
         }
-
-        const buffer = Buffer.from(await file.arrayBuffer());
 
         const results = [];
         for (const screen of screens) {
@@ -60,7 +71,7 @@ export async function POST(req: Request) {
                     contentType: mimeType,
                 });
 
-                const fileRes = await axios.post(`${baseUrl}/file_asset`, form, {
+                const fileRes = await anthias.post(`${baseUrl}/file_asset`, form, {
                     headers: form.getHeaders(),
                     timeout: 30000,
                 });
@@ -80,14 +91,14 @@ export async function POST(req: Request) {
                     skip_asset_check: true,
                 };
 
-                await axios.post(`${baseUrl}/assets`, assetPayload, {
+                await anthias.post(`${baseUrl}/assets`, assetPayload, {
                     headers: { 'Content-Type': 'application/json' },
                     timeout: 10000,
                 });
 
                 results.push({ ip: screen.ip, status: 'OK' });
-            } catch (err: any) {
-                console.error(`[ERR] ${screen.ip}:`, err.response?.data || err.message);
+            } catch (err) {
+                console.error(`[ERR] ${screen.ip}:`, errorDetail(err));
                 results.push({ ip: screen.ip, status: 'ERROR' });
             }
         }

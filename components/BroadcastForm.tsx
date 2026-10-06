@@ -3,10 +3,24 @@ import { useState, useEffect, useRef } from 'react';
 import { Send } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
-export const BroadcastForm = ({ onSubmit, loading }: any) => {
+type BroadcastFormProps = {
+    onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+    loading: boolean;
+};
+
+const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
+
+const defaultDates = () => {
+    const start = new Date();
+    return {
+        now: start.toISOString().slice(0, 16),
+        nextYear: new Date(start.getTime() + ONE_YEAR_MS).toISOString().slice(0, 16),
+    };
+};
+
+export const BroadcastForm = ({ onSubmit, loading }: BroadcastFormProps) => {
     const t = useTranslations('Broadcast');
-    const now = new Date().toISOString().slice(0, 16);
-    const nextYear = new Date(Date.now() + 31536000000).toISOString().slice(0, 16);
+    const [{ now, nextYear }] = useState(defaultDates);
     const [isVideo, setIsVideo] = useState(false);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const prevUrlRef = useRef<string | null>(null);
@@ -34,7 +48,7 @@ export const BroadcastForm = ({ onSubmit, loading }: any) => {
                     <input
                         type="file"
                         name="file"
-                        accept="image/*,video/*"
+                        accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm,video/quicktime,video/ogg"
                         required
                         onChange={handleFileChange}
                         className="w-full bg-slate-800 p-4 rounded-2xl border-2 border-dashed border-slate-700"
@@ -43,7 +57,8 @@ export const BroadcastForm = ({ onSubmit, loading }: any) => {
                         <div className="mt-3 rounded-xl overflow-hidden border border-slate-700 bg-black flex items-center justify-center max-h-48">
                             {isVideo
                                 ? <video src={previewUrl} controls className="max-h-48 w-full object-contain" />
-                                : <img src={previewUrl} className="max-h-48 object-contain" />
+                                // eslint-disable-next-line @next/next/no-img-element -- local blob: preview, next/image cannot optimize it
+                                : <img src={previewUrl} alt="" className="max-h-48 object-contain" />
                             }
                         </div>
                     )}

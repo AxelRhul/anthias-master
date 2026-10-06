@@ -2,9 +2,9 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { CheckCircle, ShieldCheck, Clock, Users, Crown } from "lucide-react";
+import Link from "next/link";
 import { canModifyUser } from "@/lib/roles";
-
-type User = { id: string; name: string | null; email: string | null; role: string; createdAt: string };
+import type { AppUser } from "@/lib/types";
 
 const ROLE_STYLES: Record<string, string> = {
     SUPER_ADMIN: "bg-purple-500/10 text-purple-400 border border-purple-500/20",
@@ -22,9 +22,9 @@ const ROLE_ICONS: Record<string, React.ReactNode> = {
 
 export default function AdminUsersPage() {
     const { data: session } = useSession();
-    const myId = (session?.user as any)?.id;
-    const myRole = (session?.user as any)?.role;
-    const [users, setUsers] = useState<User[]>([]);
+    const myId = session?.user?.id;
+    const myRole = session?.user?.role;
+    const [users, setUsers] = useState<AppUser[]>([]);
     const [loading, setLoading] = useState(true);
 
     const load = async () => {
@@ -111,7 +111,7 @@ export default function AdminUsersPage() {
                     )}
                 </div>
 
-                <a href="/" className="text-slate-500 hover:text-slate-300 text-sm transition">← Retour au tableau de bord</a>
+                <Link href="/" className="text-slate-500 hover:text-slate-300 text-sm transition">← Retour au tableau de bord</Link>
             </div>
         </div>
     );

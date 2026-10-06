@@ -4,12 +4,16 @@ import { useRouter } from 'next/navigation';
 
 const locales = ['fr', 'en'] as const;
 
+function setLocaleCookie(locale: string) {
+    document.cookie = `NEXT_LOCALE=${locale}; path=/; max-age=31536000; SameSite=Strict`;
+}
+
 export const LocaleSwitcher = () => {
     const locale = useLocale();
     const router = useRouter();
 
     const switchLocale = (next: string) => {
-        document.cookie = `NEXT_LOCALE=${next}; path=/; max-age=31536000; SameSite=Strict`;
+        setLocaleCookie(next);
         router.refresh();
     };
 

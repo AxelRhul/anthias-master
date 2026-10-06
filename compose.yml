@@ -16,25 +16,20 @@ services:
     restart: unless-stopped
 
   nginx:
-    image: nginx:alpine
+    build:
+      context: ./nginx
+    image: anthias-nginx-image
     container_name: anthias-nginx
     ports:
       - "3000:3000"
+    environment:
+      TLS_HOST: ${TLS_HOST:-localhost}
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - nginx_certs:/etc/nginx/certs
-    entrypoint: ["/bin/sh", "/entrypoint.sh"]
-    configs:
-      - source: nginx_entrypoint
-        target: /entrypoint.sh
-        mode: 0755
     depends_on:
       - nextjs-standalone
     restart: unless-stopped
-
-configs:
-  nginx_entrypoint:
-    file: ./nginx/entrypoint.sh
 
 volumes:
   sqlite_data:

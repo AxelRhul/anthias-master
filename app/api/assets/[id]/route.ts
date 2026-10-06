@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { isValidAssetId } from '@/lib/validate';
 import { deleteAssetsEverywhere } from '@/lib/anthias-delete';
-import axios from 'axios';
+import { requireUser, unauthorized } from '@/lib/require-user';
+import { anthias } from '@/lib/anthias';
 
 const formatAnthiasDate = (d: string) => {
     try {
@@ -13,6 +14,7 @@ const formatAnthiasDate = (d: string) => {
 };
 
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+    if (!(await requireUser())) return unauthorized();
     const { id } = await params;
     if (!isValidAssetId(id)) {
         return NextResponse.json({ error: "invalid_id" }, { status: 400 });
@@ -23,7 +25,7 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
 
     let name: string;
     try {
-        const res = await axios.get(`http://${screens[0].ip.trim()}/api/v2/assets/${id}`, { timeout: 5000 });
+        const res = await anthias.get(`http://${screens[0].ip.trim()}/api/v2/assets/${id}`, { timeout: 5000 });
         name = res.data.name;
     } catch {
         return NextResponse.json({ error: "not_found" }, { status: 404 });
@@ -34,6 +36,7 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
 }
 
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+    if (!(await requireUser())) return unauthorized();
     const { id } = await params;
     if (!isValidAssetId(id)) {
         return NextResponse.json({ error: "invalid_id" }, { status: 400 });
@@ -43,7 +46,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     if (screens.length === 0) return NextResponse.json({ error: "no_screen" }, { status: 404 });
 
     try {
-        const res = await axios.get(`http://${screens[0].ip.trim()}/api/v2/assets/${id}/content`, { timeout: 10000 });
+        const res = await anthias.get(`http://${screens[0].ip.trim()}/api/v2/assets/${id}/content`, { timeout: 10000 });
         return NextResponse.json(res.data);
     } catch {
         return NextResponse.json({ error: "not_found" }, { status: 404 });
@@ -51,6 +54,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
 }
 
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
+    if (!(await requireUser())) return unauthorized();
     const { id } = await params;
     if (!isValidAssetId(id)) {
         return NextResponse.json({ error: "invalid_id" }, { status: 400 });
@@ -77,7 +81,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
 
     const results = await Promise.all(screens.map(async (screen) => {
         try {
-            await axios.put(`http://${screen.ip}/api/v2/assets/${id}`, payload, { timeout: 5000 });
+            await anthias.put(`http://${screen.ip}/api/v2/assets/${id}`, payload, { timeout: 5000 });
             return { ip: screen.ip, status: "OK" };
         } catch {
             return { ip: screen.ip, status: "ERROR" };

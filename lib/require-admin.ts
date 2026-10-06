@@ -4,6 +4,6 @@ import { isAdminRole } from "@/lib/roles";
 
 export async function requireAdmin() {
     const session = await getServerSession(authOptions);
-    if (!isAdminRole((session?.user as any)?.role)) return null;
+    if (!isAdminRole(session?.user?.role)) return null;
     return session;
 }
