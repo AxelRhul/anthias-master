@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { isValidAssetId } from '@/lib/validate';
 import { EXT_MIME } from '@/lib/mime';
+import { requireUser, unauthorized } from '@/lib/require-user';
 
 function resolveMime(raw: string, uriExt: string): string {
     if (raw && raw !== 'application/octet-stream' && raw.includes('/')) return raw;
@@ -9,6 +10,7 @@ function resolveMime(raw: string, uriExt: string): string {
 }
 
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+    if (!(await requireUser())) return unauthorized();
     const { id } = await params;
     if (!isValidAssetId(id)) {
         return NextResponse.json({ error: "invalid_id" }, { status: 400 });

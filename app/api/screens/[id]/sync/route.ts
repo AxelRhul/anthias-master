@@ -3,6 +3,7 @@ import axios from 'axios';
 import FormData from 'form-data';
 import { prisma } from '@/lib/prisma';
 import { EXT_MIME, extOf } from '@/lib/mime';
+import { requireUser, unauthorized } from '@/lib/require-user';
 
 const toAnthiasDate = (d: string) => new Date(d).toISOString().split('.')[0] + 'Z';
 
@@ -12,6 +13,7 @@ const listAssets = async (ip: string): Promise<any[]> => {
 };
 
 export async function POST(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+    if (!(await requireUser())) return unauthorized();
     const { id } = await params;
     const numId = parseInt(id, 10);
     if (isNaN(numId)) return NextResponse.json({ error: "invalid_id" }, { status: 400 });

@@ -2,9 +2,11 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { isValidHost } from '@/lib/validate';
 import { requireAdmin } from '@/lib/require-admin';
+import { requireUser, unauthorized } from '@/lib/require-user';
 import axios from 'axios';
 
 export async function GET() {
+    if (!(await requireUser())) return unauthorized();
     try {
         const screens = await prisma.screen.findMany();
 

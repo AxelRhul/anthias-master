@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { isValidAssetId } from '@/lib/validate';
 import { deleteAssetsEverywhere } from '@/lib/anthias-delete';
+import { requireUser, unauthorized } from '@/lib/require-user';
 import axios from 'axios';
 
 const formatAnthiasDate = (d: string) => {
@@ -13,6 +14,7 @@ const formatAnthiasDate = (d: string) => {
 };
 
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+    if (!(await requireUser())) return unauthorized();
     const { id } = await params;
     if (!isValidAssetId(id)) {
         return NextResponse.json({ error: "invalid_id" }, { status: 400 });
@@ -34,6 +36,7 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
 }
 
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+    if (!(await requireUser())) return unauthorized();
     const { id } = await params;
     if (!isValidAssetId(id)) {
         return NextResponse.json({ error: "invalid_id" }, { status: 400 });
@@ -51,6 +54,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
 }
 
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
+    if (!(await requireUser())) return unauthorized();
     const { id } = await params;
     if (!isValidAssetId(id)) {
         return NextResponse.json({ error: "invalid_id" }, { status: 400 });

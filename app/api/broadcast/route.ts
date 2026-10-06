@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import axios from 'axios';
 import FormData from 'form-data';
+import { requireUser, unauthorized } from '@/lib/require-user';
 
 const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100 MB
 
@@ -17,6 +18,7 @@ const formatAnthiasDate = (d: any) => {
 };
 
 export async function POST(req: Request) {
+    if (!(await requireUser())) return unauthorized();
     try {
         const data = await req.formData();
         const file = data.get('file') as File;

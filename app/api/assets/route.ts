@@ -1,9 +1,11 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { deleteAssetsEverywhere } from '@/lib/anthias-delete';
+import { requireUser, unauthorized } from '@/lib/require-user';
 import axios from 'axios';
 
 export async function GET() {
+    if (!(await requireUser())) return unauthorized();
     const screens = await prisma.screen.findMany({ orderBy: { id: 'asc' } });
     if (screens.length === 0 || !screens[0].ip) return NextResponse.json([]);
 
@@ -17,6 +19,7 @@ export async function GET() {
 
 // Deletes every disabled (OFF) asset shown in the library, on all screens.
 export async function DELETE() {
+    if (!(await requireUser())) return unauthorized();
     const screens = await prisma.screen.findMany({ orderBy: { id: 'asc' } });
     if (screens.length === 0) return NextResponse.json({ error: "no_screen" }, { status: 404 });
 
