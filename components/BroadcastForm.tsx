@@ -34,7 +34,7 @@ export const BroadcastForm = ({ onSubmit, loading }: any) => {
                     <input
                         type="file"
                         name="file"
-                        accept="image/*,video/*"
+                        accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm,video/quicktime,video/ogg"
                         required
                         onChange={handleFileChange}
                         className="w-full bg-slate-800 p-4 rounded-2xl border-2 border-dashed border-slate-700"

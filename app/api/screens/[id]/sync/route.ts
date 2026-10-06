@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import axios from 'axios';
 import FormData from 'form-data';
 import { prisma } from '@/lib/prisma';
-import { EXT_MIME, extOf } from '@/lib/mime';
+import { MIME_EXT, sniffMime } from '@/lib/mime';
 import { requireUser, unauthorized } from '@/lib/require-user';
 
 const toAnthiasDate = (d: string) => new Date(d).toISOString().split('.')[0] + 'Z';
@@ -53,13 +53,14 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
             });
             if (!content.data?.content) throw new Error('no_content');
 
-            const ext = extOf(asset.uri);
-            const mime = EXT_MIME[ext] ?? asset.mimetype ?? 'application/octet-stream';
-            const safeName = String(asset.name).replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 150) || 'asset';
-            const filename = ext ? `${safeName}.${ext}` : safeName;
+            const buffer = Buffer.from(content.data.content, 'base64');
+            const mime = sniffMime(buffer);
+            if (!mime) throw new Error('unsupported_file_type');
+            const safeName = String(asset.name).replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 150) || 'asset';
+            const filename = `${safeName}.${MIME_EXT[mime]}`;
 
             const form = new FormData();
-            form.append('file_upload', Buffer.from(content.data.content, 'base64'), {
+            form.append('file_upload', buffer, {
                 filename,
                 contentType: mime,
             });

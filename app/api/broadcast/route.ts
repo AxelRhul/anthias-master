@@ -3,10 +3,9 @@ import { prisma } from '@/lib/prisma';
 import axios from 'axios';
 import FormData from 'form-data';
 import { requireUser, unauthorized } from '@/lib/require-user';
+import { MIME_EXT, sniffMime } from '@/lib/mime';
 
 const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100 MB
-
-const ALLOWED_MIME_PREFIXES = ['image/', 'video/'];
 
 const formatAnthiasDate = (d: any) => {
     try {
@@ -28,8 +27,9 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "file_too_large" }, { status: 413 });
         }
 
-        const mimeType = file.type || '';
-        if (!ALLOWED_MIME_PREFIXES.some(prefix => mimeType.startsWith(prefix))) {
+        const buffer = Buffer.from(await file.arrayBuffer());
+        const mimeType = sniffMime(buffer);
+        if (!mimeType) {
             return NextResponse.json({ error: "invalid_file_type" }, { status: 415 });
         }
 
@@ -41,15 +41,14 @@ export async function POST(req: Request) {
         const start_date = data.get('start_date') as string;
         const end_date = data.get('end_date') as string;
 
-        // Sanitize filename: keep only safe characters
-        const safeFilename = file.name.replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 200);
+        // Safe characters only, and the extension always matches the detected type
+        const baseName = file.name.replace(/\.[^.]*$/, '').replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 150) || 'asset';
+        const safeFilename = `${baseName}.${MIME_EXT[mimeType]}`;
 
         const screens = await prisma.screen.findMany();
         if (screens.length === 0) {
             return NextResponse.json({ error: "no_screens" }, { status: 400 });
         }
-
-        const buffer = Buffer.from(await file.arrayBuffer());
 
         const results = [];
         for (const screen of screens) {
