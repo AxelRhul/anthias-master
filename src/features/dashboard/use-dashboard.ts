@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useSession } from 'next-auth/react';
-import { isAdminRole } from '@/features/auth/roles';
+import { isAdminRole, isSuperAdmin } from '@/features/auth/roles';
 import type { Asset } from '@/features/assets/types';
 import type { Screen } from '@/features/screens/types';
 
@@ -13,6 +13,8 @@ export function useDashboard() {
   const t = useTranslations('modals');
   const { data: session } = useSession();
   const isAdmin = isAdminRole(session?.user?.role);
+  const superAdmin = isSuperAdmin(session?.user?.role);
+  const [credentialsFor, setCredentialsFor] = useState<Screen | null>(null);
   const [screens, setScreens] = useState<Screen[]>([]);
   const [assets, setAssets] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(true);
@@ -64,6 +66,8 @@ export function useDashboard() {
           : t('syncDone', { copied: data.copied, failed: data.failed }));
       } else if (data.error === 'no_source') {
         setToast(t('syncNoSource'));
+      } else if (data.error === 'target_auth_failed') {
+        setToast(t('syncAuthFailed'));
       } else {
         setToast(t('syncError'));
       }
@@ -88,6 +92,35 @@ export function useDashboard() {
     const created = await res.json();
     await loadAll();
     syncScreen(created.id);
+  };
+
+  const saveCredentials = async (username: string, password: string) => {
+    if (!credentialsFor) return;
+    const res = await fetch(`/api/screens/${credentialsFor.id}/credentials`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password }),
+    });
+    if (res.ok) {
+      setCredentialsFor(null);
+      setToast(t('credentialsSaved'));
+      loadAll();
+      return;
+    }
+    const data = await res.json().catch(() => ({}));
+    setToast(data.error === 'encryption_key_missing' ? t('credentialsKeyMissing') : t('credentialsError'));
+  };
+
+  const removeCredentials = async () => {
+    if (!credentialsFor) return;
+    const res = await fetch(`/api/screens/${credentialsFor.id}/credentials`, { method: 'DELETE' });
+    if (res.ok) {
+      setCredentialsFor(null);
+      setToast(t('credentialsRemoved'));
+      loadAll();
+    } else {
+      setToast(t('credentialsError'));
+    }
   };
 
   const handleBroadcast = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -156,9 +189,13 @@ export function useDashboard() {
   };
 
   return {
-    isAdmin, screens, assets, loading, toast, syncingId, confirm, preview, editingAsset,
+    isAdmin, isSuperAdmin: superAdmin, screens, assets, loading, toast, syncingId, confirm, preview, editingAsset,
+    credentialsFor,
     dismissToast: () => setToast(null),
     setEditingAsset,
+    openCredentials: setCredentialsFor,
+    closeCredentials: () => setCredentialsFor(null),
+    saveCredentials, removeCredentials,
     loadAll, addScreen, deleteScreen, syncScreen, handleBroadcast, openViewer, closePreview,
     askDeleteAsset, askDeleteDisabled, cancelDelete, runDelete, saveChanges,
   };

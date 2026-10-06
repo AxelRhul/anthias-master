@@ -4,6 +4,7 @@ import { Header } from '@/components/Header';
 import { Toast } from '@/components/Toast';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { ScreenManager } from '@/features/screens/components/ScreenManager';
+import { ScreenCredentialsDialog } from '@/features/screens/components/ScreenCredentialsDialog';
 import { BroadcastForm } from '@/features/assets/components/BroadcastForm';
 import { AssetLibrary } from '@/features/assets/components/AssetLibrary';
 import { AssetPreview } from '@/features/assets/components/AssetPreview';
@@ -28,6 +29,8 @@ export default function MasterOps() {
                 onSync={d.syncScreen}
                 syncingId={d.syncingId}
                 isAdmin={d.isAdmin}
+                isSuperAdmin={d.isSuperAdmin}
+                onEditCredentials={d.openCredentials}
               />
             </div>
 
@@ -45,6 +48,15 @@ export default function MasterOps() {
         </div>
 
         {d.toast && <Toast message={d.toast} onClose={d.dismissToast} />}
+
+        {d.credentialsFor && (
+          <ScreenCredentialsDialog
+            screen={d.credentialsFor}
+            onSave={d.saveCredentials}
+            onRemove={d.removeCredentials}
+            onClose={d.closeCredentials}
+          />
+        )}
 
         {d.confirm && (
           <ConfirmDialog

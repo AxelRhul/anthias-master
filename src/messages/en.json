@@ -10,7 +10,15 @@
     "labelName": "Name (ex: Lobby)",
     "btnSave": "Save",
     "invalidIp": "Invalid IP address or hostname",
-    "sync": "Sync media from another device"
+    "sync": "Sync media from another device",
+    "credentials": "Device login",
+    "credentialsTitle": "Device login",
+    "credentialsHint": "Basic authentication enabled in the Anthias settings. The password is encrypted and never shown again.",
+    "username": "Username",
+    "password": "Password",
+    "passwordKeep": "Password (leave empty to keep it)",
+    "credentialsRemove": "Remove",
+    "authFailedHint": "Login refused or missing: ask the super administrator to set it"
   },
   "Broadcast": {
     "title": "Group Broadcast",
@@ -39,6 +47,11 @@
     "syncUpToDate": "Device already up to date",
     "syncNoSource": "No other online device to copy from",
     "syncError": "Sync failed",
+    "syncAuthFailed": "The device refuses the connection: login missing or incorrect",
+    "credentialsSaved": "Login saved",
+    "credentialsRemoved": "Login removed",
+    "credentialsError": "Could not save the login",
+    "credentialsKeyMissing": "Encryption key missing (CREDENTIALS_ENCRYPTION_KEY): cannot save",
     "confirmDeleteTitle": "Delete permanently",
     "confirmDeleteOne": "Delete \"{name}\" from all devices? This cannot be undone.",
     "confirmDeleteOff": "Delete the {count} disabled asset(s) from all devices? This cannot be undone.",
