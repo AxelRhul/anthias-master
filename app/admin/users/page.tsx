@@ -1,17 +1,20 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
-import { CheckCircle, XCircle, ShieldCheck, Clock, Users } from "lucide-react";
+import { CheckCircle, ShieldCheck, Clock, Users, Crown } from "lucide-react";
+import { canModifyUser } from "@/lib/roles";
 
 type User = { id: string; name: string | null; email: string | null; role: string; createdAt: string };
 
 const ROLE_STYLES: Record<string, string> = {
+    SUPER_ADMIN: "bg-purple-500/10 text-purple-400 border border-purple-500/20",
     ADMIN: "bg-blue-500/10 text-blue-400 border border-blue-500/20",
     USER: "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20",
     PENDING: "bg-amber-500/10 text-amber-400 border border-amber-500/20",
 };
 
 const ROLE_ICONS: Record<string, React.ReactNode> = {
+    SUPER_ADMIN: <Crown size={14} />,
     ADMIN: <ShieldCheck size={14} />,
     USER: <CheckCircle size={14} />,
     PENDING: <Clock size={14} />,
@@ -20,6 +23,7 @@ const ROLE_ICONS: Record<string, React.ReactNode> = {
 export default function AdminUsersPage() {
     const { data: session } = useSession();
     const myId = (session?.user as any)?.id;
+    const myRole = (session?.user as any)?.role;
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -81,23 +85,22 @@ export default function AdminUsersPage() {
                                         <td className="px-6 py-4">
                                             <div className="flex gap-2">
                                                 {user.id === myId && <span className="text-xs text-slate-500 italic">Vous</span>}
-                                                {user.id !== myId && user.role !== "ADMIN" && (
-                                                    <button onClick={() => setRole(user.id, "ADMIN")}
-                                                        className="px-3 py-1.5 text-xs font-bold bg-blue-600/20 hover:bg-blue-600/40 text-blue-400 rounded-xl transition flex items-center gap-1">
-                                                        <ShieldCheck size={13} /> Admin
-                                                    </button>
-                                                )}
-                                                {user.id !== myId && user.role !== "USER" && (
+                                                {user.id !== myId && !canModifyUser(myId, myRole, user) && <span className="text-xs text-slate-600 italic">—</span>}
+                                                {canModifyUser(myId, myRole, user) && user.role === "PENDING" && (
                                                     <button onClick={() => setRole(user.id, "USER")}
                                                         className="px-3 py-1.5 text-xs font-bold bg-emerald-600/20 hover:bg-emerald-600/40 text-emerald-400 rounded-xl transition flex items-center gap-1">
                                                         <CheckCircle size={13} /> Approuver
                                                     </button>
                                                 )}
-                                                {user.id !== myId && user.role !== "PENDING" && (
-                                                    <button onClick={() => setRole(user.id, "PENDING")}
-                                                        className="px-3 py-1.5 text-xs font-bold bg-rose-600/20 hover:bg-rose-600/40 text-rose-400 rounded-xl transition flex items-center gap-1">
-                                                        <XCircle size={13} /> Révoquer
-                                                    </button>
+                                                {canModifyUser(myId, myRole, user) && user.role !== "PENDING" && (
+                                                    <select
+                                                        value={user.role}
+                                                        onChange={e => setRole(user.id, e.target.value)}
+                                                        className="bg-slate-800 border border-slate-700 text-sm font-bold px-3 py-1.5 rounded-xl outline-none cursor-pointer"
+                                                    >
+                                                        <option value="USER">USER</option>
+                                                        <option value="ADMIN">ADMIN</option>
+                                                    </select>
                                                 )}
                                             </div>
                                         </td>
