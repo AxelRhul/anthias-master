@@ -11,6 +11,12 @@
     "toc": "Contents",
     "adminBadge": "Administrators",
     "missingCapture": "Screenshot to add",
+    "openImage": "Click to enlarge",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "zoomReset": "Original size",
+    "closeImage": "Close",
+    "zoomHint": "Wheel or buttons to zoom, drag to move, double-click to enlarge, Esc to close",
     "sections": {
       "overview": {
         "title": "Overview",
@@ -129,6 +135,10 @@
           {
             "q": "\"Too many attempts\" appears when signing in.",
             "a": "Too many wrong passwords were entered. Wait 15 minutes before trying again."
+          },
+          {
+            "q": "The screenshots are too small to read.",
+            "a": "Click a screenshot to open it full screen. You can then zoom with the wheel or the +/- buttons, move the image by dragging it, double-click to enlarge, and close with Esc."
           },
           {
             "q": "How do I change the language?",

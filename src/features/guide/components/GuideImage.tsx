@@ -1,5 +1,6 @@
 import { existsSync } from 'node:fs';
 import path from 'node:path';
+import { ZoomableImage } from '@/features/guide/components/ZoomableImage';
 
 type GuideImageProps = {
     file: string;
@@ -22,11 +23,5 @@ export function GuideImage({ file, caption, missingLabel }: GuideImageProps) {
         );
     }
 
-    return (
-        <figure className="space-y-2">
-            {/* eslint-disable-next-line @next/next/no-img-element -- static documentation screenshot of unknown size */}
-            <img src={`/images/guide/${file}`} alt={caption} className="w-full rounded-xl border border-slate-800" />
-            <figcaption className="text-sm text-slate-500 italic">{caption}</figcaption>
-        </figure>
-    );
+    return <ZoomableImage src={`/images/guide/${file}`} alt={caption} caption={caption} />;
 }

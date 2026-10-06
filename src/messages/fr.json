@@ -11,6 +11,12 @@
     "toc": "Sommaire",
     "adminBadge": "Administrateurs",
     "missingCapture": "Capture à ajouter",
+    "openImage": "Cliquer pour agrandir",
+    "zoomIn": "Zoom avant",
+    "zoomOut": "Zoom arrière",
+    "zoomReset": "Taille d'origine",
+    "closeImage": "Fermer",
+    "zoomHint": "Molette ou boutons pour zoomer, glisser pour déplacer, double-clic pour agrandir, Échap pour fermer",
     "sections": {
       "overview": {
         "title": "Vue d'ensemble",
@@ -129,6 +135,10 @@
           {
             "q": "« Trop de tentatives » s'affiche à la connexion.",
             "a": "Trop de mots de passe incorrects ont été saisis. Attendez 15 minutes avant de réessayer."
+          },
+          {
+            "q": "Les captures sont trop petites pour lire le texte.",
+            "a": "Cliquez sur une capture pour l'ouvrir en plein écran. Vous pouvez ensuite zoomer avec la molette ou les boutons +/−, déplacer l'image en la faisant glisser, double-cliquer pour agrandir, et fermer avec Échap."
           },
           {
             "q": "Comment changer la langue ?",
