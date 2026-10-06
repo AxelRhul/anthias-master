@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
-import { anthias } from '@/lib/anthias';
+import { anthiasFor } from '@/lib/anthias';
 import FormData from 'form-data';
 import { prisma } from '@/lib/prisma';
 import { MIME_EXT, sniffMime } from '@/features/assets/mime';
 import { requireUser, unauthorized } from '@/features/auth/require-user';
-import { errorDetail } from '@/lib/errors';
+import { errorDetail, errorStatus } from '@/lib/errors';
 import type { Asset } from '@/features/assets/types';
 
 // A 100 MB file is ~134 MB once base64-encoded by Anthias; anything larger is refused instead of buffered
@@ -12,8 +12,8 @@ const MAX_CONTENT_BYTES = 150 * 1024 * 1024;
 
 const toAnthiasDate = (d: string) => new Date(d).toISOString().split('.')[0] + 'Z';
 
-const listAssets = async (ip: string): Promise<Asset[]> => {
-    const res = await anthias.get(`http://${ip}/api/v2/assets`, { timeout: 5000 });
+const listAssets = async (client: ReturnType<typeof anthiasFor>): Promise<Asset[]> => {
+    const res = await client.get('/assets', { timeout: 5000 });
     return Array.isArray(res.data) ? res.data : [];
 };
 
@@ -28,21 +28,25 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
 
     const others = await prisma.screen.findMany({ where: { id: { not: numId } }, orderBy: { id: 'asc' } });
 
-    let source: { ip: string; assets: Asset[] } | null = null;
+    let source: { client: ReturnType<typeof anthiasFor>; assets: Asset[] } | null = null;
     for (const s of others) {
         try {
-            source = { ip: s.ip.trim(), assets: await listAssets(s.ip.trim()) };
+            const client = anthiasFor(s);
+            source = { client, assets: await listAssets(client) };
             break;
         } catch { /* try next screen */ }
     }
     if (!source) return NextResponse.json({ error: "no_source" }, { status: 409 });
 
     const targetIp = target.ip.trim();
+    const targetClient = anthiasFor(target);
     let existing: Asset[];
     try {
-        existing = await listAssets(targetIp);
-    } catch {
-        return NextResponse.json({ error: "target_unreachable" }, { status: 502 });
+        existing = await listAssets(targetClient);
+    } catch (err) {
+        const status = errorStatus(err);
+        const authFailed = status === 401 || status === 403;
+        return NextResponse.json({ error: authFailed ? "target_auth_failed" : "target_unreachable" }, { status: 502 });
     }
 
     const existingNames = new Set(existing.map(a => a.name));
@@ -52,7 +56,7 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
     let failed = 0;
     for (const asset of missing) {
         try {
-            const content = await anthias.get(`http://${source.ip}/api/v2/assets/${asset.asset_id}/content`, {
+            const content = await source.client.get(`/assets/${asset.asset_id}/content`, {
                 timeout: 120000,
                 maxContentLength: MAX_CONTENT_BYTES,
             });
@@ -69,13 +73,13 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
                 filename,
                 contentType: mime,
             });
-            const fileRes = await anthias.post(`http://${targetIp}/api/v2/file_asset`, form, {
+            const fileRes = await targetClient.post('/file_asset', form, {
                 headers: form.getHeaders(),
                 timeout: 120000,
                 maxBodyLength: MAX_CONTENT_BYTES,
             });
 
-            await anthias.post(`http://${targetIp}/api/v2/assets`, {
+            await targetClient.post('/assets', {
                 ext: fileRes.data.ext,
                 name: asset.name,
                 uri: fileRes.data.uri,

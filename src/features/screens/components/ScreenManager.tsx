@@ -1,6 +1,6 @@
 "use client";
 import { useRef, useState } from 'react';
-import { Wifi, WifiOff, Trash2, RefreshCw } from 'lucide-react';
+import { Wifi, WifiOff, Trash2, RefreshCw, KeyRound, ShieldAlert } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { isValidHost } from '@/features/screens/validate-host';
 import type { Screen } from '@/features/screens/types';
@@ -12,9 +12,11 @@ type ScreenManagerProps = {
     onSync: (id: number) => void;
     syncingId: number | null;
     isAdmin: boolean;
+    isSuperAdmin: boolean;
+    onEditCredentials: (screen: Screen) => void;
 };
 
-export const ScreenManager = ({ screens, onAdd, onDelete, onSync, syncingId, isAdmin }: ScreenManagerProps) => {
+export const ScreenManager = ({ screens, onAdd, onDelete, onSync, syncingId, isAdmin, isSuperAdmin, onEditCredentials }: ScreenManagerProps) => {
     const t = useTranslations('Screens');
     const ipRef = useRef<HTMLInputElement>(null);
     const labelRef = useRef<HTMLInputElement>(null);
@@ -53,6 +55,17 @@ export const ScreenManager = ({ screens, onAdd, onDelete, onSync, syncingId, isA
                                 >
                                     <RefreshCw size={16} className={syncingId === s.id ? 'animate-spin' : ''} />
                                 </button>
+                                {isSuperAdmin ? (
+                                    <button
+                                        onClick={() => onEditCredentials(s)}
+                                        className={`p-1.5 transition-colors ${s.authFailed ? 'text-amber-400' : s.hasCredentials ? 'text-emerald-500' : 'text-slate-600 hover:text-blue-400'}`}
+                                        title={s.authFailed ? t('authFailedHint') : t('credentials')}
+                                    >
+                                        <KeyRound size={16} />
+                                    </button>
+                                ) : s.authFailed ? (
+                                    <span className="p-1.5 text-amber-400" title={t('authFailedHint')}><ShieldAlert size={16} /></span>
+                                ) : null}
                                 {isAdmin && (
                                     <button
                                         onClick={() => onDelete(s.id)}

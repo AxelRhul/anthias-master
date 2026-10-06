@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { anthias } from '@/lib/anthias';
+import { anthiasFor } from '@/lib/anthias';
 import FormData from 'form-data';
 import { requireUser, unauthorized } from '@/features/auth/require-user';
 import { MIME_EXT, sniffMime } from '@/features/assets/mime';
@@ -63,7 +63,7 @@ export async function POST(req: Request) {
         const results = [];
         for (const screen of screens) {
             try {
-                const baseUrl = `http://${screen.ip.trim()}/api/v2`;
+                const client = anthiasFor(screen);
 
                 const form = new FormData();
                 form.append('file_upload', buffer, {
@@ -71,7 +71,7 @@ export async function POST(req: Request) {
                     contentType: mimeType,
                 });
 
-                const fileRes = await anthias.post(`${baseUrl}/file_asset`, form, {
+                const fileRes = await client.post('/file_asset', form, {
                     headers: form.getHeaders(),
                     timeout: 30000,
                 });
@@ -91,7 +91,7 @@ export async function POST(req: Request) {
                     skip_asset_check: true,
                 };
 
-                await anthias.post(`${baseUrl}/assets`, assetPayload, {
+                await client.post('/assets', assetPayload, {
                     headers: { 'Content-Type': 'application/json' },
                     timeout: 10000,
                 });
