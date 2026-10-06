@@ -21,8 +21,18 @@ if (!azureEnabled) {
     console.warn("[auth] Microsoft login disabled: set AZURE_AD_CLIENT_ID, AZURE_AD_CLIENT_SECRET and AZURE_AD_TENANT_ID (tenant GUID).");
 }
 
+const baseAdapter = PrismaAdapter(prisma);
+const adapter = {
+    ...baseAdapter,
+    // Sessions are JWT-only and the Microsoft tokens are never used afterwards: do not store them in the database
+    linkAccount: (account: any) => {
+        const { access_token, refresh_token, id_token, expires_at, ext_expires_in, token_type, scope, session_state, ...identity } = account;
+        return baseAdapter.linkAccount!(identity);
+    },
+};
+
 export const authOptions: NextAuthOptions = {
-    adapter: PrismaAdapter(prisma) as any,
+    adapter: adapter as any,
     // Short lifetime bounds how long the role stored in the cookie (read by the middleware) can be stale
     session: { strategy: "jwt", maxAge: 12 * 60 * 60 },
     pages: { signIn: "/login" },
