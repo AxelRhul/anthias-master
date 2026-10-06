@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { prisma } from "../lib/prisma";
+import { prisma } from "../src/lib/prisma";
 
 // Removes the Microsoft tokens stored by older versions of the app (they are never used).
 async function main() {
