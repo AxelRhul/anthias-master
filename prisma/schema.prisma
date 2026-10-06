@@ -8,10 +8,13 @@ datasource db {
 }
 
 model Screen {
-  id        Int      @id @default(autoincrement())
-  ip        String   @unique
-  label     String
-  createdAt DateTime @default(now())
+  id          Int      @id @default(autoincrement())
+  ip          String   @unique
+  label       String
+  // Basic-auth credentials of the Anthias device. The password is stored encrypted (AES-256-GCM), never in clear text.
+  username    String?
+  passwordEnc String?
+  createdAt   DateTime @default(now())
 }
 
 model User {
