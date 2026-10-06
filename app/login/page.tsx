@@ -1,9 +1,11 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { signIn, getProviders } from "next-auth/react";
 import { Monitor } from "lucide-react";
 
 export default function LoginPage() {
+    const router = useRouter();
     const [hasAzure, setHasAzure] = useState(false);
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -21,7 +23,10 @@ export default function LoginPage() {
         const res = await signIn("credentials", { email, password, redirect: false });
         if (res?.error === "TooManyAttempts") setError("Trop de tentatives. Réessayez dans 15 minutes.");
         else if (res?.error) setError("Email ou mot de passe incorrect.");
-        else window.location.href = "/";
+        else {
+            router.replace("/");
+            router.refresh();
+        }
         setLoading(false);
     };
 

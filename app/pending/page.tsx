@@ -13,7 +13,7 @@ export default function PendingPage() {
                     <Clock size={40} className="text-amber-400 mx-auto" />
                     <h2 className="text-xl font-bold text-amber-400">Accès en attente</h2>
                     <p className="text-slate-400 text-sm leading-relaxed">
-                        Votre compte a bien été créé. Un administrateur doit approuver votre accès avant que vous puissiez utiliser l'application.
+                        Votre compte a bien été créé. Un administrateur doit approuver votre accès avant que vous puissiez utiliser l&apos;application.
                     </p>
                     <button
                         onClick={() => signOut({ callbackUrl: "/login" })}

@@ -8,35 +8,47 @@ import { ScreenManager } from '@/components/ScreenManager';
 import { BroadcastForm } from '@/components/BroadcastForm';
 import { AssetLibrary } from '@/components/AssetLibrary';
 import { Toast } from '@/components/Toast';
+import type { Asset, Screen } from '@/lib/types';
 import { Save, X } from 'lucide-react';
 
 export default function MasterOps() {
   const t = useTranslations('modals');
   const { data: session } = useSession();
-  const isAdmin = isAdminRole((session?.user as any)?.role);
-  const [screens, setScreens] = useState<any[]>([]);
-  const [assets, setAssets] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
+  const isAdmin = isAdminRole(session?.user?.role);
+  const [screens, setScreens] = useState<Screen[]>([]);
+  const [assets, setAssets] = useState<Asset[]>([]);
+  const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState<string | null>(null);
   const [syncingId, setSyncingId] = useState<number | null>(null);
   const [confirm, setConfirm] = useState<{ kind: 'one'; id: string; name: string } | { kind: 'off'; count: number } | null>(null);
-  const [preview, setPreview] = useState<any>(null);
-  const [editingAsset, setEditingAsset] = useState<any>(null);
+  const [preview, setPreview] = useState<{ objectUrl: string; mimetype: string; name: string } | null>(null);
+  const [editingAsset, setEditingAsset] = useState<Asset | null>(null);
 
-  useEffect(() => { loadAll(); }, []);
+  const fetchAll = async () => {
+    const sData = await fetch('/api/screens').then(r => r.json());
+    const aData = await fetch('/api/assets').then(r => r.json());
+    return {
+      screens: (Array.isArray(sData) ? sData : []) as Screen[],
+      assets: (Array.isArray(aData) ? aData : []) as Asset[],
+    };
+  };
 
   const loadAll = async () => {
     setLoading(true);
     try {
-      const sRes = await fetch('/api/screens');
-      const sData = await sRes.json();
-      setScreens(Array.isArray(sData) ? sData : []);
-      const aRes = await fetch('/api/assets');
-      const aData = await aRes.json();
-      setAssets(Array.isArray(aData) ? aData : []);
+      const data = await fetchAll();
+      setScreens(data.screens);
+      setAssets(data.assets);
     } catch (err) { console.error(err); }
     finally { setLoading(false); }
   };
+
+  useEffect(() => {
+    fetchAll()
+      .then(data => { setScreens(data.screens); setAssets(data.assets); })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
 
   const deleteScreen = async (id: number) => {
     await fetch(`/api/screens/${id}`, { method: 'DELETE' });
@@ -132,6 +144,7 @@ export default function MasterOps() {
 
   const saveChanges = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!editingAsset) return;
     setLoading(true);
     await fetch(`/api/assets/${editingAsset.asset_id}`, {
       method: 'PUT',
@@ -190,7 +203,8 @@ export default function MasterOps() {
                     onClick={e => e.stopPropagation()}
                   />
                 ) : (
-                  <img src={preview.objectUrl} className="max-w-full max-h-[75vh] rounded-xl shadow-2xl border-2 border-slate-800" />
+                  // eslint-disable-next-line @next/next/no-img-element -- blob: URL of an uploaded file, next/image cannot optimize it
+                  <img src={preview.objectUrl} alt={preview.name} className="max-w-full max-h-[75vh] rounded-xl shadow-2xl border-2 border-slate-800" />
                 )}
                 <p className="mt-6 text-slate-500 italic">{t('closeHint')}</p>
               </div>
@@ -208,7 +222,7 @@ export default function MasterOps() {
                 <input value={editingAsset.name} onChange={e => setEditingAsset({ ...editingAsset, name: e.target.value })} className="w-full bg-slate-800 p-3 rounded-xl outline-none" placeholder={t('name')} />
 
                 <div className="grid grid-cols-2 gap-4">
-                  <input type="number" value={editingAsset.duration} onChange={e => setEditingAsset({ ...editingAsset, duration: e.target.value })} className="w-full bg-slate-800 p-3 rounded-xl outline-none" placeholder={t('duration')} />
+                  <input type="number" value={editingAsset.duration} onChange={e => setEditingAsset({ ...editingAsset, duration: Number(e.target.value) })} className="w-full bg-slate-800 p-3 rounded-xl outline-none" placeholder={t('duration')} />
                   <select value={editingAsset.is_enabled.toString()} onChange={e => setEditingAsset({ ...editingAsset, is_enabled: e.target.value === "true" })} className="w-full bg-slate-800 p-3 rounded-xl outline-none">
                     <option value="true">{t('active')}</option>
                     <option value="false">{t('inactive')}</option>
